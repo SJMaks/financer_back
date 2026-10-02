@@ -3,8 +3,8 @@ package transport
 import "github.com/gin-gonic/gin"
 
 func RegisterRouter(r *gin.RouterGroup, h *Handler) {
-	g := r.Group("/users")
+	g := r.Group("/auth")
 	{
-		g.GET("/ping", h.Ping)
+		g.POST("/register", h.Register)
 	}
 }

@@ -1,26 +1,59 @@
 package transport
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/SJMaks/financer_back/internal/features/users/service"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Handler struct {
 	srv *service.Service
+	log *zap.SugaredLogger
 }
 
-func NewHandler(srv *service.Service) *Handler {
+func NewHandler(srv *service.Service, log *zap.SugaredLogger) *Handler {
 	return &Handler{
 		srv: srv,
+		log: log,
 	}
 }
 
-func (h Handler) Ping(c *gin.Context) {
-	answer, err := h.srv.Ping()
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+func (h Handler) Register(c *gin.Context) {
+	dto := &UserRegisterDTO{}
+	if err := c.ShouldBindJSON(dto); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	c.JSON(http.StatusCreated, answer)
+
+	user := dto.UserRegisterToDomain()
+	res, err := h.srv.Register(c.Request.Context(), user, dto.Password)
+	if err != nil {
+		h.writeServiceError(c, err)
+		return
+	}
+	u := DomainToResponse(*res)
+
+	c.JSON(http.StatusCreated, u)
+}
+
+func (h Handler) writeServiceError(c *gin.Context, err error) {
+	switch {
+	case errors.Is(err, service.EmptyLogin) ||
+		errors.Is(err, service.EmptyFullname) ||
+		errors.Is(err, service.WrongPasswordFormat):
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	case errors.Is(err, service.UserNotFound):
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	case errors.Is(err, service.UserAlreadyExists):
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
+	default:
+		h.log.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }

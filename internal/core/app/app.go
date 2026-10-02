@@ -25,7 +25,7 @@ func NewApp(ctx context.Context, log *zap.SugaredLogger, db *pgxpool.Pool, cfg *
 
 	usersRepo := usersRepo.NewPostgres(db)
 	usersSrv := usersService.NewService(usersRepo)
-	usersHandler := usersTransport.NewHandler(usersSrv)
+	usersHandler := usersTransport.NewHandler(usersSrv, log)
 
 	usersTransport.RegisterRouter(api, usersHandler)
 
