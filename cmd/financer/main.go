@@ -64,7 +64,7 @@ func run() (err error) {
 	case err := <-errChan:
 		return err
 	case <-ctx.Done():
-		log.Info("shutdown signal recieved")
+		log.Info("shutdown signal received")
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
