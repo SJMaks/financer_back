@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/SJMaks/financer_back/internal/core/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,11 +17,13 @@ type Repository interface {
 
 type Service struct {
 	repo Repository
+	tm   auth.TokenManager
 }
 
-func NewService(repo Repository) *Service {
+func NewService(repo Repository, tm auth.TokenManager) *Service {
 	return &Service{
 		repo: repo,
+		tm:   tm,
 	}
 }
 
@@ -46,13 +49,6 @@ func (s *Service) Register(ctx context.Context, u User, password string) (*User,
 	if len(strings.TrimSpace(u.Fullname)) < 1 {
 		return nil, EmptyFullname
 	}
-	existingUser, err := s.repo.GetByLogin(ctx, u.Login)
-	if err != nil && !errors.Is(err, UserNotFound) {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, UserAlreadyExists
-	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -61,4 +57,26 @@ func (s *Service) Register(ctx context.Context, u User, password string) (*User,
 
 	u.PasswordHash = string(hash)
 	return s.repo.Create(ctx, &u)
+}
+
+func (s *Service) Login(ctx context.Context, u User, password string) (string, error) {
+	existingUser, err := s.repo.GetByLogin(ctx, u.Login)
+	if errors.Is(err, UserNotFound) {
+		return "", InvalidCredentials
+	}
+	if err != nil {
+		return "", err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(password)); err != nil {
+		return "", InvalidCredentials
+	}
+	payload := auth.TokenPayload{
+		ID:    existingUser.ID,
+		Login: existingUser.Login,
+	}
+	token, err := s.tm.Generate(payload)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

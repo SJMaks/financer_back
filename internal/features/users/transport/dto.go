@@ -8,7 +8,7 @@ type UserRegisterDTO struct {
 	Fullname string `json:"full_name"`
 }
 
-func (u UserRegisterDTO) UserRegisterToDomain() service.User {
+func (u UserRegisterDTO) ToDomain() service.User {
 	return service.User{
 		Login:    u.Login,
 		Fullname: u.Fullname,
@@ -25,4 +25,19 @@ func DomainToResponse(u service.User) UserResponseDTO {
 		Login:    u.Login,
 		Fullname: u.Fullname,
 	}
+}
+
+type LoginRequestDTO struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
+func (l LoginRequestDTO) ToDomain() service.User {
+	return service.User{
+		Login: l.Login,
+	}
+}
+
+type LoginResponseDTO struct {
+	Token string `json:"jwt"`
 }

@@ -21,14 +21,14 @@ func NewHandler(srv *service.Service, log *zap.SugaredLogger) *Handler {
 	}
 }
 
-func (h Handler) Register(c *gin.Context) {
+func (h *Handler) Register(c *gin.Context) {
 	dto := &UserRegisterDTO{}
 	if err := c.ShouldBindJSON(dto); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user := dto.UserRegisterToDomain()
+	user := dto.ToDomain()
 	res, err := h.srv.Register(c.Request.Context(), user, dto.Password)
 	if err != nil {
 		h.writeServiceError(c, err)
@@ -39,7 +39,25 @@ func (h Handler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, u)
 }
 
-func (h Handler) writeServiceError(c *gin.Context, err error) {
+func (h *Handler) Login(c *gin.Context) {
+	dto := &LoginRequestDTO{}
+	if err := c.ShouldBindJSON(dto); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := dto.ToDomain()
+	token, err := h.srv.Login(c.Request.Context(), user, dto.Password)
+	if err != nil {
+		h.writeServiceError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, LoginResponseDTO{
+		Token: token,
+	})
+}
+
+func (h *Handler) writeServiceError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, service.EmptyLogin) ||
 		errors.Is(err, service.EmptyFullname) ||
@@ -49,11 +67,14 @@ func (h Handler) writeServiceError(c *gin.Context, err error) {
 	case errors.Is(err, service.UserNotFound):
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
+	case errors.Is(err, service.InvalidCredentials):
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	case errors.Is(err, service.UserAlreadyExists):
 		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	default:
 		h.log.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 	}
 }

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users
 (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
   login VARCHAR(30) UNIQUE NOT NULL,
   pass_hash VARCHAR(100) NOT NULL,
@@ -9,43 +9,43 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS accounts
 (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
-  user_id INTEGER REFERENCES users(id),
+  user_id INTEGER REFERENCES users(id) NOT NULL,
   title VARCHAR(50) NOT NULL,
   description VARCHAR(500),
   icon VARCHAR(50),
-  color VARCHAR(30),
-  balance MONEY NOT NULL
+  color VARCHAR(7),
+  balance NUMERIC(20,2) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS operation_type
 (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   title VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS operation_categories
 (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
   user_id INTEGER REFERENCES users(id),
-  operation_type_id INTEGER REFERENCES operation_type(id),
+  operation_type_id INTEGER REFERENCES operation_type(id) NOT NULL,
   title VARCHAR(50) NOT NULL,
   icon VARCHAR(50),
-  color VARCHAR(3)
+  color VARCHAR(7)
 );
 
 CREATE TABLE IF NOT EXISTS operations
 (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
-  account_id INTEGER REFERENCES accounts(id),
-  category_id INTEGER REFERENCES operation_categories(id),
+  account_id INTEGER REFERENCES accounts(id) NOT NULL,
+  category_id INTEGER REFERENCES operation_categories(id) NOT NULL,
   title VARCHAR(50) NOT NULL,
   description VARCHAR(500),
   exec_at TIMESTAMPTZ NOT NULL,
-  sum MONEY NOT NULL
+  sum NUMERIC(20,2) NOT NULL
 );
 
 INSERT INTO operation_type (title) VALUES ('income');
