@@ -129,5 +129,6 @@ func (h *Handler) writeServiceError(c *gin.Context, err error) {
 	default:
 		h.log.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
 	}
 }
