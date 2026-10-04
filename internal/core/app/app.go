@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 
+	"github.com/SJMaks/financer_back/internal/core/auth"
 	"github.com/SJMaks/financer_back/internal/core/config"
 	"github.com/SJMaks/financer_back/internal/core/httpserver"
+	"github.com/SJMaks/financer_back/internal/core/middleware"
 	usersRepo "github.com/SJMaks/financer_back/internal/features/users/repository"
 	usersService "github.com/SJMaks/financer_back/internal/features/users/service"
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
@@ -17,21 +19,26 @@ type App struct {
 	server *httpserver.Server
 }
 
-func NewApp(ctx context.Context, log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) (*App, error) {
+func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
+
+	jwt := auth.NewJWT(cfg)
+
+	authMiddleware := middleware.NewAuthMiddleware(jwt)
 
 	api := engine.Group("/api/v1")
 
 	usersRepo := usersRepo.NewPostgres(db)
-	usersSrv := usersService.NewService(usersRepo)
-	usersHandler := usersTransport.NewHandler(usersSrv)
+	usersSrv := usersService.NewService(usersRepo, jwt)
+	usersHandler := usersTransport.NewHandler(usersSrv, log)
 
-	usersTransport.RegisterRouter(api, usersHandler)
+	usersTransport.RegisterPublicRouter(api, usersHandler)
+	usersTransport.RegisterPrivateRouter(api, usersHandler, authMiddleware.CheckAuth)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),
-	}, nil
+	}
 }
 
 func (a *App) Run() error {

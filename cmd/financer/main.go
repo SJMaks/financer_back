@@ -37,7 +37,9 @@ func run() (err error) {
 		return err
 	}
 	defer func() {
-		err = closeFile()
+		if cerr := closeFile(); cerr != nil && err == nil {
+			err = cerr
+		}
 	}()
 
 	db, err := database.NewPostgres(ctx, cfg)
@@ -45,18 +47,15 @@ func run() (err error) {
 		log.Error(err)
 		return err
 	}
+	defer db.Close()
 
-	app, err := app.NewApp(ctx, log, db, cfg)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	app := app.NewApp(log, db, cfg)
 
 	errChan := make(chan error, 1)
 
 	go func() {
-		log.Info("http server starting on addr: ", cfg.HTTPAddr)
-		if err := app.Run(); err != nil && errors.Is(err, http.ErrServerClosed) {
+		log.Infow("http server starting", "addr", cfg.HTTPAddr)
+		if err := app.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errChan <- fmt.Errorf("start http server: %w", err)
 		}
 	}()
@@ -65,7 +64,7 @@ func run() (err error) {
 	case err := <-errChan:
 		return err
 	case <-ctx.Done():
-		log.Info("shutdown signal recieved")
+		log.Info("shutdown signal received")
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

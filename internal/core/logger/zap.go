@@ -11,16 +11,16 @@ import (
 )
 
 func NewZap() (*zap.SugaredLogger, func() error, error) {
-	if err := os.MkdirAll("out/logs", 0755); err != nil {
-		return &zap.SugaredLogger{}, nil, fmt.Errorf("mkdir logs: %s", err)
+	if err := os.MkdirAll("_out/logs", 0755); err != nil {
+		return nil, nil, fmt.Errorf("mkdir logs: %s", err)
 	}
 
 	timestamp := time.Now().UTC().Format("2006-01-02T15-04-05.000000")
-	filePath := filepath.Join("out/logs", fmt.Sprintf("%s.log", timestamp))
+	filePath := filepath.Join("_out/logs", fmt.Sprintf("%s.log", timestamp))
 
 	logFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return &zap.SugaredLogger{}, nil, fmt.Errorf("open log file: %s", err)
+		return nil, nil, fmt.Errorf("open log file: %s", err)
 	}
 
 	cfg := zap.NewProductionEncoderConfig()
