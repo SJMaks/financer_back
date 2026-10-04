@@ -65,7 +65,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	idStr, ok := c.Params.Get("id")
+	idStr, ok := c.Params.Get("accountID")
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": service.MissingID.Error()})
 		return
@@ -89,7 +89,7 @@ func (h *Handler) UpdateByID(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	idStr, ok := c.Params.Get("id")
+	idStr, ok := c.Params.Get("accountID")
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": service.MissingID.Error()})
 		return
@@ -122,7 +122,7 @@ func (h *Handler) DeleteByID(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	idStr, ok := c.Params.Get("id")
+	idStr, ok := c.Params.Get("accountID")
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": service.MissingID.Error()})
 		return

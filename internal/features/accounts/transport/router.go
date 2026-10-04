@@ -7,8 +7,8 @@ func RegisterPrivateRouter(r *gin.RouterGroup, h *Handler, mid gin.HandlerFunc) 
 	{
 		g.POST("", h.Create)
 		g.GET("", h.GetAllOfUser)
-		g.GET("/:id", h.GetByID)
-		g.PATCH("/:id", h.UpdateByID)
-		g.DELETE("/:id", h.DeleteByID)
+		g.GET("/:accountID", h.GetByID)
+		g.PATCH("/:accountID", h.UpdateByID)
+		g.DELETE("/:accountID", h.DeleteByID)
 	}
 }

@@ -11,7 +11,7 @@ type Repository interface {
 	Create(ctx context.Context, a *domain.Account) (*domain.Account, error)
 	GetAllOfUser(ctx context.Context, userID int64) ([]domain.Account, error)
 	GetByID(ctx context.Context, id, userID int64) (*domain.Account, error)
-	UpdateByID(ctx context.Context, a *domain.Account) (*domain.Account, error)
+	UpdateByID(ctx context.Context, a *domain.PatchAccount) (*domain.Account, error)
 	DeleteByID(ctx context.Context, id, userID int64) error
 }
 
@@ -43,11 +43,11 @@ func (s *Service) GetByID(ctx context.Context, id, userID int64) (*domain.Accoun
 	return s.repo.GetByID(ctx, id, userID)
 }
 
-func (s *Service) UpdateByID(ctx context.Context, a *domain.Account) (*domain.Account, error) {
-	if len(strings.TrimSpace(a.Title)) < 1 {
+func (s *Service) UpdateByID(ctx context.Context, a *domain.PatchAccount) (*domain.Account, error) {
+	if a.Title != nil && len(strings.TrimSpace(*a.Title)) < 1 {
 		return nil, EmptyTitle
 	}
-	if a.Balance < 0 {
+	if a.Balance != nil && *a.Balance < 0 {
 		return nil, NegativeBalance
 	}
 	return s.repo.UpdateByID(ctx, a)

@@ -76,13 +76,13 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id, userID int64) (*do
 	return category, nil
 }
 
-func (r *PostgresRepository) UpdateByID(ctx context.Context, c *domain.Category) (*domain.Category, error) {
+func (r *PostgresRepository) UpdateByID(ctx context.Context, c *domain.PatchCategory) (*domain.Category, error) {
 	qry := `UPDATE operation_categories SET 
 	version = version + 1,
-	operation_type_id = $1,
-	title = $2, 
-	icon = $3, 
-	color = $4
+	operation_type_id = COALESCE($1, operation_type_id),
+	title = COALESCE($2, title),
+	icon = COALESCE($3, icon),
+	color = COALESCE($4, color),
 	WHERE id = $5 AND user_id = $6 AND version = $7
 	RETURNING id, version, user_id, operation_type_id, title, icon, color;`
 	category := &domain.Category{}

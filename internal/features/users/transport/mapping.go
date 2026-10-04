@@ -24,8 +24,8 @@ func LoginDTOToDomain(dto LoginRequestDTO) *domain.User {
 	}
 }
 
-func UpdateDTOToDomain(dto UpdateRequestDTO) *domain.User {
-	return &domain.User{
+func UpdateDTOToDomain(dto UpdateRequestDTO) *domain.PatchUser {
+	return &domain.PatchUser{
 		Fullname: dto.Fullname,
 	}
 }

@@ -17,7 +17,7 @@ type LoginRequestDTO struct {
 }
 
 type UpdateRequestDTO struct {
-	Fullname string `json:"full_name"`
+	Fullname *string `json:"full_name"`
 }
 
 type LoginResponseDTO struct {

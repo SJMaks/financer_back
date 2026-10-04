@@ -66,8 +66,8 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id int64) (*domain.Use
 }
 
 // TODO: если возникнет оптимистичной блокировки, реализовать UpdateByIDWithVersion
-func (r *PostgresRepository) UpdateByID(ctx context.Context, u *domain.User) (*domain.User, error) {
-	qry := `UPDATE users SET full_name = $1,
+func (r *PostgresRepository) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error) {
+	qry := `UPDATE users SET full_name = COALESCE($1, full_name),
 	version = version + 1 WHERE id = $2 RETURNING
 	id, version, login, pass_hash, full_name;`
 	user := &domain.User{}

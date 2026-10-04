@@ -15,7 +15,7 @@ type Repository interface {
 	GetByLogin(ctx context.Context, login string) (*domain.User, error)
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
 	Create(ctx context.Context, u *domain.User) (*domain.User, error)
-	UpdateByID(ctx context.Context, u *domain.User) (*domain.User, error)
+	UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error)
 	DeleteByID(ctx context.Context, id int64) error
 }
 
@@ -89,7 +89,10 @@ func (s *Service) GetByID(ctx context.Context, id int64) (*domain.User, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
-func (s *Service) UpdateByID(ctx context.Context, u *domain.User) (*domain.User, error) {
+func (s *Service) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error) {
+	if u.Fullname != nil && len(strings.TrimSpace(*u.Fullname)) < 1 {
+		return nil, EmptyFullname
+	}
 	return s.repo.UpdateByID(ctx, u)
 }
 

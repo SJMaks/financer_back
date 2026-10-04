@@ -11,8 +11,8 @@ func CreateCategoryDTOToDomain(dto *CreateCategoryDTO) *domain.Category {
 	}
 }
 
-func UpdateCategoryDTOToDomain(dto *UpdateCategoryDTO) *domain.Category {
-	return &domain.Category{
+func UpdateCategoryDTOToDomain(dto *UpdateCategoryDTO) *domain.PatchCategory {
+	return &domain.PatchCategory{
 		Version:         dto.Version,
 		OperationTypeID: dto.OperationTypeID,
 		Title:           dto.Title,
@@ -27,14 +27,14 @@ func DomainToResponseDTO(c *domain.Category) *ResponseCategoryDTO {
 		Version:         c.Version,
 		OperationTypeID: c.OperationTypeID,
 		Title:           c.Title,
-		Icon:            c.Icon,
-		Color:           c.Color,
+		Icon:            *c.Icon,
+		Color:           *c.Color,
 	}
 }
 
-func DomainsToResponseDTO(accs []domain.Category) *ResponseCategoriesDTO {
-	dtos := make([]ResponseCategoryDTO, len(accs))
-	for i, c := range accs {
+func DomainsToResponseDTO(ctgs []domain.Category) *ResponseCategoriesDTO {
+	dtos := make([]ResponseCategoryDTO, len(ctgs))
+	for i, c := range ctgs {
 		dtos[i] = *DomainToResponseDTO(&c)
 	}
 	return &ResponseCategoriesDTO{
