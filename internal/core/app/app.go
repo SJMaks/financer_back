@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/SJMaks/financer_back/internal/core/auth"
 	"github.com/SJMaks/financer_back/internal/core/config"
@@ -34,19 +33,8 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	usersSrv := usersService.NewService(usersRepo, jwt)
 	usersHandler := usersTransport.NewHandler(usersSrv, log)
 
-	g := api.Group("/ping", authMiddleware.CheckAuth)
-	{
-		g.GET("/", func(c *gin.Context) {
-			p, ok := middleware.UserFromContext(c)
-			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{"id": p.ID, "login": p.Login})
-		})
-	}
-
-	usersTransport.RegisterRouter(api, usersHandler)
+	usersTransport.RegisterPublicRouter(api, usersHandler)
+	usersTransport.RegisterPrivateRouter(api, usersHandler, authMiddleware.CheckAuth)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),

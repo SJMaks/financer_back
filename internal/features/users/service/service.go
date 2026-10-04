@@ -7,12 +7,16 @@ import (
 	"strings"
 
 	"github.com/SJMaks/financer_back/internal/core/auth"
+	"github.com/SJMaks/financer_back/internal/features/users/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
-	GetByLogin(ctx context.Context, login string) (*User, error)
-	Create(ctx context.Context, u *User) (*User, error)
+	GetByLogin(ctx context.Context, login string) (*domain.User, error)
+	GetByID(ctx context.Context, id int64) (*domain.User, error)
+	Create(ctx context.Context, u *domain.User) (*domain.User, error)
+	UpdateByID(ctx context.Context, u *domain.User) (*domain.User, error)
+	DeleteByID(ctx context.Context, id int64) error
 }
 
 type Service struct {
@@ -39,7 +43,7 @@ func validatePassword(p string) bool {
 		reDigit.MatchString(p)
 }
 
-func (s *Service) Register(ctx context.Context, u User, password string) (*User, error) {
+func (s *Service) Register(ctx context.Context, u *domain.User, password string) (*domain.User, error) {
 	if len(strings.TrimSpace(u.Login)) < 1 {
 		return nil, EmptyLogin
 	}
@@ -55,11 +59,11 @@ func (s *Service) Register(ctx context.Context, u User, password string) (*User,
 		return nil, err
 	}
 
-	u.PasswordHash = string(hash)
-	return s.repo.Create(ctx, &u)
+	u.Password = string(hash)
+	return s.repo.Create(ctx, u)
 }
 
-func (s *Service) Login(ctx context.Context, u User, password string) (string, error) {
+func (s *Service) Login(ctx context.Context, u *domain.User) (string, error) {
 	existingUser, err := s.repo.GetByLogin(ctx, u.Login)
 	if errors.Is(err, UserNotFound) {
 		return "", InvalidCredentials
@@ -67,7 +71,7 @@ func (s *Service) Login(ctx context.Context, u User, password string) (string, e
 	if err != nil {
 		return "", err
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(u.Password)); err != nil {
 		return "", InvalidCredentials
 	}
 	payload := auth.TokenPayload{
@@ -79,4 +83,16 @@ func (s *Service) Login(ctx context.Context, u User, password string) (string, e
 		return "", err
 	}
 	return token, nil
+}
+
+func (s *Service) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *Service) UpdateByID(ctx context.Context, u *domain.User) (*domain.User, error) {
+	return s.repo.UpdateByID(ctx, u)
+}
+
+func (s *Service) DeleteByID(ctx context.Context, id int64) error {
+	return s.repo.DeleteByID(ctx, id)
 }

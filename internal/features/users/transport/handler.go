@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/SJMaks/financer_back/internal/core/middleware"
 	"github.com/SJMaks/financer_back/internal/features/users/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -28,7 +29,7 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	user := dto.ToDomain()
+	user := RegisterDTOToDomain(*dto)
 	res, err := h.srv.Register(c.Request.Context(), user, dto.Password)
 	if err != nil {
 		h.writeServiceError(c, err)
@@ -46,8 +47,8 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	user := dto.ToDomain()
-	token, err := h.srv.Login(c.Request.Context(), user, dto.Password)
+	user := LoginDTOToDomain(*dto)
+	token, err := h.srv.Login(c.Request.Context(), user)
 	if err != nil {
 		h.writeServiceError(c, err)
 		return
@@ -55,6 +56,58 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, LoginResponseDTO{
 		Token: token,
 	})
+}
+
+func (h *Handler) GetMe(c *gin.Context) {
+	p, ok := middleware.UserFromContext(c)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	u, err := h.srv.GetByID(c.Request.Context(), p.ID)
+	if err != nil {
+		h.writeServiceError(c, err)
+		return
+	}
+	res := DomainToResponse(*u)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) UpdateMe(c *gin.Context) {
+	p, ok := middleware.UserFromContext(c)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	dto := &UpdateRequestDTO{}
+	if err := c.ShouldBindJSON(dto); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := UpdateDTOToDomain(*dto)
+	user.ID = p.ID
+	u, err := h.srv.UpdateByID(c.Request.Context(), user)
+	if err != nil {
+		h.writeServiceError(c, err)
+		return
+	}
+	res := DomainToResponse(*u)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) DeleteMe(c *gin.Context) {
+	p, ok := middleware.UserFromContext(c)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if err := h.srv.DeleteByID(c.Request.Context(), p.ID); err != nil {
+		h.writeServiceError(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 func (h *Handler) writeServiceError(c *gin.Context, err error) {

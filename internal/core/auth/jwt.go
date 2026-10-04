@@ -27,7 +27,7 @@ var _ TokenManager = (*JWTTokenManager)(nil)
 
 func (tm *JWTTokenManager) Generate(p TokenPayload) (string, error) {
 	regClaims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(12 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		Issuer:    "financer",
 		Subject:   p.Login,
