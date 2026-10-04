@@ -88,7 +88,6 @@ func (r *PostgresRepository) DeleteByID(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-
 	if tag.RowsAffected() == 0 {
 		return service.UserNotFound
 	}

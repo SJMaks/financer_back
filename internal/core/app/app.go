@@ -7,6 +7,9 @@ import (
 	"github.com/SJMaks/financer_back/internal/core/config"
 	"github.com/SJMaks/financer_back/internal/core/httpserver"
 	"github.com/SJMaks/financer_back/internal/core/middleware"
+	accountsRepo "github.com/SJMaks/financer_back/internal/features/accounts/repository"
+	accountsService "github.com/SJMaks/financer_back/internal/features/accounts/service"
+	accountsTransport "github.com/SJMaks/financer_back/internal/features/accounts/transport"
 	usersRepo "github.com/SJMaks/financer_back/internal/features/users/repository"
 	usersService "github.com/SJMaks/financer_back/internal/features/users/service"
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
@@ -35,6 +38,12 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 
 	usersTransport.RegisterPublicRouter(api, usersHandler)
 	usersTransport.RegisterPrivateRouter(api, usersHandler, authMiddleware.CheckAuth)
+
+	accsRepo := accountsRepo.NewPostgres(db)
+	accsSrv := accountsService.NewService(accsRepo)
+	accsHandler := accountsTransport.NewHandler(log, accsSrv)
+
+	accountsTransport.RegisterPrivateRouter(api, accsHandler, authMiddleware.CheckAuth)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),
