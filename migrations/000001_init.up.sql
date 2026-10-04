@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS accounts
   balance NUMERIC(20,2) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS operation_type
+CREATE TABLE IF NOT EXISTS operation_types
 (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   title VARCHAR(50) NOT NULL
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS operation_categories
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
   user_id INTEGER REFERENCES users(id),
-  operation_type_id INTEGER REFERENCES operation_type(id) NOT NULL,
+  operation_type_id INTEGER REFERENCES operation_types(id) NOT NULL,
   title VARCHAR(50) NOT NULL,
   icon VARCHAR(50),
   color VARCHAR(7)
@@ -48,5 +48,5 @@ CREATE TABLE IF NOT EXISTS operations
   sum NUMERIC(20,2) NOT NULL
 );
 
-INSERT INTO operation_type (title) VALUES ('income');
-INSERT INTO operation_type (title) VALUES ('expense');
+INSERT INTO operation_types (title) VALUES ('income');
+INSERT INTO operation_types (title) VALUES ('expense');

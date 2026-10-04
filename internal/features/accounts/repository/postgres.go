@@ -109,7 +109,8 @@ func (r *PostgresRepository) UpdateByID(ctx context.Context, a *domain.Account) 
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		var exists bool
-		_ = r.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM accounts WHERE id = $1);`, a.ID).Scan(&exists)
+		_ = r.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM accounts 
+		WHERE id = $1 AND user_id = $2);`, a.ID, a.UserID).Scan(&exists)
 
 		if !exists {
 			return nil, service.AccountNotFound

@@ -10,6 +10,12 @@ import (
 	accountsRepo "github.com/SJMaks/financer_back/internal/features/accounts/repository"
 	accountsService "github.com/SJMaks/financer_back/internal/features/accounts/service"
 	accountsTransport "github.com/SJMaks/financer_back/internal/features/accounts/transport"
+	categoriesRepo "github.com/SJMaks/financer_back/internal/features/categories/repository"
+	categoriesService "github.com/SJMaks/financer_back/internal/features/categories/service"
+	categoriesTransport "github.com/SJMaks/financer_back/internal/features/categories/transport"
+	operationTypesRepo "github.com/SJMaks/financer_back/internal/features/operation_types/repository"
+	operationTypesService "github.com/SJMaks/financer_back/internal/features/operation_types/service"
+	operationTypesTransport "github.com/SJMaks/financer_back/internal/features/operation_types/transport"
 	usersRepo "github.com/SJMaks/financer_back/internal/features/users/repository"
 	usersService "github.com/SJMaks/financer_back/internal/features/users/service"
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
@@ -44,6 +50,18 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	accsHandler := accountsTransport.NewHandler(log, accsSrv)
 
 	accountsTransport.RegisterPrivateRouter(api, accsHandler, authMiddleware.CheckAuth)
+
+	ctgRepo := categoriesRepo.NewPostgres(db)
+	ctgSrv := categoriesService.NewService(ctgRepo)
+	ctgHandler := categoriesTransport.NewHandler(log, ctgSrv)
+
+	categoriesTransport.RegisterPrivateRouter(api, ctgHandler, authMiddleware.CheckAuth)
+
+	opTypesRepo := operationTypesRepo.NewPostgres(db)
+	opTypesSrv := operationTypesService.NewService(opTypesRepo)
+	opTypesHandler := operationTypesTransport.NewHandler(log, opTypesSrv)
+
+	operationTypesTransport.RegisterPrivateRouter(api, opTypesHandler, authMiddleware.CheckAuth)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),

@@ -31,13 +31,13 @@ func (a *AuthMiddleware) CheckAuth(c *gin.Context) {
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "wrong authorization header"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
 		return
 	}
 
 	payload, err := a.tm.Parse(headerParts[1])
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "wrong authorization token"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization token"})
 		return
 	}
 
