@@ -1,20 +1,24 @@
 package middleware
 
 import (
-	"net/http"
 	"strings"
 
+	"github.com/SJMaks/financer_back/internal/core/apperrors"
 	"github.com/SJMaks/financer_back/internal/core/auth"
+	"github.com/SJMaks/financer_back/internal/core/utils"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AuthMiddleware struct {
-	tm auth.TokenManager
+	log *zap.SugaredLogger
+	tm  auth.TokenManager
 }
 
-func NewAuthMiddleware(tm auth.TokenManager) *AuthMiddleware {
+func NewAuthMiddleware(log *zap.SugaredLogger, tm auth.TokenManager) *AuthMiddleware {
 	return &AuthMiddleware{
-		tm: tm,
+		log: log,
+		tm:  tm,
 	}
 }
 
@@ -25,19 +29,19 @@ const userCtxKey ctxKey = "auth.user"
 func (a *AuthMiddleware) CheckAuth(c *gin.Context) {
 	header := c.GetHeader("Authorization")
 	if header == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "no authorization header"})
+		utils.WriteHTTPError(c, a.log, apperrors.Unauthorized)
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
+		utils.WriteHTTPError(c, a.log, apperrors.Unauthorized)
 		return
 	}
 
 	payload, err := a.tm.Parse(headerParts[1])
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization token"})
+		utils.WriteHTTPError(c, a.log, apperrors.Unauthorized)
 		return
 	}
 

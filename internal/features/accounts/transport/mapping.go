@@ -12,8 +12,8 @@ func CreateAccountDTOToDomain(dto *CreateAccountDTO) *domain.Account {
 	}
 }
 
-func UpdateAccountDTOToDomain(dto *UpdateAccountDTO) *domain.Account {
-	return &domain.Account{
+func UpdateAccountDTOToDomain(dto *UpdateAccountDTO) *domain.PatchAccount {
+	return &domain.PatchAccount{
 		Version:     dto.Version,
 		Title:       dto.Title,
 		Description: dto.Description,
@@ -24,13 +24,23 @@ func UpdateAccountDTOToDomain(dto *UpdateAccountDTO) *domain.Account {
 }
 
 func DomainToResponseDTO(a *domain.Account) *ResponseAccountDTO {
+	var description, icon, color string
+	if a.Description != nil {
+		description = *a.Description
+	}
+	if a.Icon != nil {
+		icon = *a.Icon
+	}
+	if a.Color != nil {
+		color = *a.Color
+	}
 	return &ResponseAccountDTO{
 		ID:          a.ID,
 		Version:     a.Version,
 		Title:       a.Title,
-		Description: a.Description,
-		Icon:        a.Icon,
-		Color:       a.Color,
+		Description: description,
+		Icon:        icon,
+		Color:       color,
 		Balance:     a.Balance,
 	}
 }

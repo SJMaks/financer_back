@@ -22,7 +22,7 @@ func NewPostgres(db *pgxpool.Pool) *PostgresRepository {
 var _ service.Repository = (*PostgresRepository)(nil)
 
 func (r *PostgresRepository) GetAll(ctx context.Context) ([]domain.OperationType, error) {
-	qry := `SELECT id, title FROM operation_types;`
+	qry := `SELECT id, title FROM operation_types ORDER BY id;`
 	rows, err := r.db.Query(ctx, qry)
 	if err != nil {
 		return nil, err
