@@ -37,7 +37,7 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 
 	jwt := auth.NewJWT(cfg)
 
-	authMiddleware := middleware.NewAuthMiddleware(jwt)
+	authMiddleware := middleware.NewAuthMiddleware(log, jwt)
 
 	api := engine.Group("/api/v1")
 

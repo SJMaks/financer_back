@@ -12,7 +12,7 @@ type CreateOperationDTO struct {
 }
 
 type UpdateOperationDTO struct {
-	Version     int64      `json:"version"`
+	Version     *int64     `json:"version"`
 	CategoryID  *int64     `json:"category_id"`
 	Title       *string    `json:"title"`
 	Description *string    `json:"description"`

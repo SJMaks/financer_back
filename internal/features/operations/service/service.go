@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/SJMaks/financer_back/internal/features/operations/domain"
 )
@@ -28,19 +29,36 @@ func NewService(repo Repository) *Service {
 
 func (s *Service) Create(ctx context.Context, o *domain.Operation) (*domain.Operation, error) {
 	if o.AccountID == 0 {
-		return nil, MissingAccountID
+		return nil, AccountIDRequired
 	}
 	if o.CategoryID == 0 {
-		return nil, MissingCategoryID
+		return nil, CategoryIDRequired
 	}
-	if len(strings.TrimSpace(o.Title)) < 1 {
-		return nil, EmptyTitle
+
+	title := strings.TrimSpace(o.Title)
+	o.Title = title
+	var description string
+	if o.Description != nil {
+		description = strings.TrimSpace(*o.Description)
+		o.Description = &description
 	}
+
+	if title == "" {
+		return nil, TitleRequired
+	}
+	if utf8.RuneCountInString(title) > 50 {
+		return nil, InvalidTitle
+	}
+
+	if utf8.RuneCountInString(description) > 500 {
+		return nil, InvalidDescription
+	}
+
 	if o.ExecutedAt.IsZero() {
 		o.ExecutedAt = time.Now()
 	}
 	if o.Sum < 0 {
-		return nil, NegativeSum
+		return nil, InvalidSum
 	}
 	return s.repo.Create(ctx, o)
 }
@@ -54,18 +72,35 @@ func (s *Service) GetByID(ctx context.Context, id, userID, accountID int64) (*do
 }
 
 func (s *Service) UpdateByID(ctx context.Context, o *domain.PatchOperation) (*domain.Operation, error) {
+	if o.Version == nil {
+		return nil, MissingVersion
+	}
+
 	if o.CategoryID != nil && *o.CategoryID == 0 {
-		return nil, MissingCategoryID
+		return nil, CategoryIDRequired
 	}
-	if o.Title != nil && len(strings.TrimSpace(*o.Title)) < 1 {
-		return nil, EmptyTitle
+
+	var title, description string
+	if o.Title != nil {
+		title = strings.TrimSpace(*o.Title)
+		o.Title = &title
 	}
-	if o.ExecutedAt != nil && o.ExecutedAt.IsZero() {
-		now := time.Now()
-		o.ExecutedAt = &now
+	if o.Description != nil {
+		description = strings.TrimSpace(*o.Description)
+		o.Description = &description
+	}
+
+	if utf8.RuneCountInString(title) > 50 {
+		return nil, InvalidTitle
+	}
+	if utf8.RuneCountInString(description) > 500 {
+		return nil, InvalidDescription
 	}
 	if o.Sum != nil && *o.Sum < 0 {
-		return nil, NegativeSum
+		return nil, InvalidSum
+	}
+	if o.ExecutedAt != nil && o.ExecutedAt.IsZero() {
+		return nil, InvalidExecAt
 	}
 	return s.repo.UpdateByID(ctx, o)
 }

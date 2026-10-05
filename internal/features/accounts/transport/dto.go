@@ -9,7 +9,7 @@ type CreateAccountDTO struct {
 }
 
 type UpdateAccountDTO struct {
-	Version     int64    `json:"version"`
+	Version     *int64   `json:"version"`
 	Title       *string  `json:"title"`
 	Description *string  `json:"description"`
 	Icon        *string  `json:"icon"`

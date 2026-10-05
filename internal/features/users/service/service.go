@@ -5,6 +5,7 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/SJMaks/financer_back/internal/core/auth"
 	"github.com/SJMaks/financer_back/internal/features/users/domain"
@@ -32,26 +33,60 @@ func NewService(repo Repository, tm auth.TokenManager) *Service {
 }
 
 var (
-	reAllowed = regexp.MustCompile(`^[A-Za-z0-9]{5,30}$`)
-	reUpper   = regexp.MustCompile(`[A-Z]`)
-	reDigit   = regexp.MustCompile(`[0-9]`)
+	reLoginAllowed = regexp.MustCompile(`^[A-Za-z0-9]{5,30}$`)
+	reNameAllowed  = regexp.MustCompile(`^[\p{L}]+(?: [\p{L}]+)*$`)
+	rePassAllowed  = regexp.MustCompile(`^[A-Za-z0-9]{5,50}$`)
+	rePassUpper    = regexp.MustCompile(`[A-Z]`)
+	rePassDigit    = regexp.MustCompile(`[0-9]`)
 )
 
+func validateLogin(l string) bool {
+	return reLoginAllowed.MatchString(l)
+}
+
 func validatePassword(p string) bool {
-	return reAllowed.MatchString(p) &&
-		reUpper.MatchString(p) &&
-		reDigit.MatchString(p)
+	return rePassAllowed.MatchString(p) &&
+		rePassUpper.MatchString(p) &&
+		rePassDigit.MatchString(p)
+}
+
+func validateFullname(f string) bool {
+	return reNameAllowed.MatchString(f)
 }
 
 func (s *Service) Register(ctx context.Context, u *domain.User, password string) (*domain.User, error) {
-	if len(strings.TrimSpace(u.Login)) < 1 {
-		return nil, EmptyLogin
+	u.Login = strings.TrimSpace(u.Login)
+	login := u.Login
+	fullname := strings.TrimSpace(u.Fullname)
+
+	switch {
+	case login == "":
+		return nil, LoginRequired
+	case password == "":
+		return nil, PasswordRequired
+	case fullname == "":
+		return nil, FullnameRequired
 	}
+
+	if loginOk := validateLogin(login); !loginOk {
+		return nil, InvalidLogin
+	}
+	if utf8.RuneCountInString(login) > 30 {
+		return nil, InvalidLogin
+	}
+
 	if passOk := validatePassword(password); !passOk {
-		return nil, WrongPasswordFormat
+		return nil, InvalidPassword
 	}
-	if len(strings.TrimSpace(u.Fullname)) < 1 {
-		return nil, EmptyFullname
+	if utf8.RuneCountInString(password) > 50 {
+		return nil, InvalidPassword
+	}
+
+	if nameOk := validateFullname(fullname); !nameOk {
+		return nil, InvalidFullname
+	}
+	if utf8.RuneCountInString(fullname) > 100 {
+		return nil, InvalidFullname
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -64,6 +99,13 @@ func (s *Service) Register(ctx context.Context, u *domain.User, password string)
 }
 
 func (s *Service) Login(ctx context.Context, u *domain.User) (string, error) {
+	switch {
+	case strings.TrimSpace(u.Login) == "":
+		return "", LoginRequired
+	case strings.TrimSpace(u.Password) == "":
+		return "", PasswordRequired
+	}
+
 	existingUser, err := s.repo.GetByLogin(ctx, u.Login)
 	if errors.Is(err, UserNotFound) {
 		return "", InvalidCredentials
@@ -90,9 +132,19 @@ func (s *Service) GetByID(ctx context.Context, id int64) (*domain.User, error) {
 }
 
 func (s *Service) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error) {
-	if u.Fullname != nil && len(strings.TrimSpace(*u.Fullname)) < 1 {
-		return nil, EmptyFullname
+	if u.Fullname != nil {
+		fullname := strings.TrimSpace(*u.Fullname)
+		if fullname == "" {
+			return nil, FullnameRequired
+		}
+		if nameOk := validateFullname(fullname); !nameOk {
+			return nil, InvalidFullname
+		}
+		if utf8.RuneCountInString(fullname) > 100 {
+			return nil, InvalidFullname
+		}
 	}
+
 	return s.repo.UpdateByID(ctx, u)
 }
 

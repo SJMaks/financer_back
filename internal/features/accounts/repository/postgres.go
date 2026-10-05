@@ -45,7 +45,7 @@ func (r *PostgresRepository) Create(ctx context.Context, a *domain.Account) (*do
 
 func (r *PostgresRepository) GetAllOfUser(ctx context.Context, userID int64) ([]domain.Account, error) {
 	qry := `SELECT id, version, user_id, title, description, icon, color, balance FROM accounts
-	WHERE user_id = $1;`
+	WHERE user_id = $1 ORDER BY id;`
 	rows, err := r.db.Query(ctx, qry, userID)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (r *PostgresRepository) UpdateByID(ctx context.Context, a *domain.PatchAcco
 	description = COALESCE($2, description),
 	icon = COALESCE($3, icon), 
 	color = COALESCE($4, color),
-	balance = COALESCE($5, balance),
+	balance = COALESCE($5, balance)
 	WHERE id = $6 AND user_id = $7 AND version = $8
 	RETURNING id, version, user_id, title, description, icon, color, balance;`
 	account := &domain.Account{}

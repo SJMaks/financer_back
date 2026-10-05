@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/SJMaks/financer_back/internal/features/categories/domain"
 )
@@ -26,12 +27,36 @@ func NewService(repo Repository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, c *domain.Category) (*domain.Category, error) {
-	if len(strings.TrimSpace(c.Title)) < 1 {
-		return nil, EmptyTitle
-	}
 	if c.OperationTypeID == 0 {
-		return nil, MissingOperationTypeID
+		return nil, OperationTypeIDRequired
 	}
+
+	title := strings.TrimSpace(c.Title)
+	c.Title = title
+	var icon, color string
+	if c.Icon != nil {
+		icon = strings.TrimSpace(*c.Icon)
+		c.Icon = &icon
+	}
+	if c.Color != nil {
+		color = strings.TrimSpace(*c.Color)
+		c.Color = &color
+	}
+
+	if title == "" {
+		return nil, TitleRequired
+	}
+	if utf8.RuneCountInString(title) > 50 {
+		return nil, InvalidTitle
+	}
+
+	if utf8.RuneCountInString(icon) > 50 {
+		return nil, InvalidIcon
+	}
+	if utf8.RuneCountInString(color) > 7 {
+		return nil, InvalidColor
+	}
+
 	return s.repo.Create(ctx, c)
 }
 
@@ -44,12 +69,33 @@ func (s *Service) GetByID(ctx context.Context, id, userID int64) (*domain.Catego
 }
 
 func (s *Service) UpdateByID(ctx context.Context, c *domain.PatchCategory) (*domain.Category, error) {
-	if c.Title != nil && len(strings.TrimSpace(*c.Title)) < 1 {
-		return nil, EmptyTitle
+	if c.Version == nil {
+		return nil, MissingVersion
 	}
-	if c.OperationTypeID != nil && *c.OperationTypeID == 0 {
-		return nil, MissingOperationTypeID
+	var title, icon, color string
+	if c.Title != nil {
+		title = strings.TrimSpace(*c.Title)
+		c.Title = &title
 	}
+	if c.Icon != nil {
+		icon = strings.TrimSpace(*c.Icon)
+		c.Icon = &icon
+	}
+	if c.Color != nil {
+		color = strings.TrimSpace(*c.Color)
+		c.Color = &color
+	}
+
+	if utf8.RuneCountInString(title) > 50 {
+		return nil, InvalidTitle
+	}
+	if utf8.RuneCountInString(icon) > 50 {
+		return nil, InvalidIcon
+	}
+	if utf8.RuneCountInString(color) > 7 {
+		return nil, InvalidColor
+	}
+
 	return s.repo.UpdateByID(ctx, c)
 }
 

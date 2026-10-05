@@ -8,7 +8,7 @@ type CreateCategoryDTO struct {
 }
 
 type UpdateCategoryDTO struct {
-	Version         int64   `json:"version"`
+	Version         *int64  `json:"version"`
 	OperationTypeID *int64  `json:"operation_type_id"`
 	Title           *string `json:"title"`
 	Icon            *string `json:"icon"`

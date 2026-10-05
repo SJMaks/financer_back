@@ -16,7 +16,7 @@ type Operation struct {
 
 type PatchOperation struct {
 	ID          int64      `json:"id"`
-	Version     int64      `json:"version"`
+	Version     *int64     `json:"version"`
 	UserID      int64      `json:"user_id"`
 	AccountID   int64      `json:"account_id"`
 	CategoryID  *int64     `json:"category_id"`

@@ -13,7 +13,7 @@ type Account struct {
 
 type PatchAccount struct {
 	ID          int64    `json:"id"`
-	Version     int64    `json:"version"`
+	Version     *int64   `json:"version"`
 	UserID      int64    `json:"user_id"`
 	Title       *string  `json:"title"`
 	Description *string  `json:"description"`
