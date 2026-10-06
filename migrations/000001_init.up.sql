@@ -64,3 +64,32 @@ CREATE INDEX idx_operations_user_account_exec_at ON operations (user_id, account
 
 INSERT INTO operation_types (title) VALUES ('income');
 INSERT INTO operation_types (title) VALUES ('expense');
+
+CREATE OR REPLACE VIEW v_account_monthly_stats AS
+SELECT
+    a.id    AS account_id,
+    a.user_id,
+    date_trunc('month', o.exec_at) AS month,
+    COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0) AS income,
+    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS expense,
+    COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0)
+      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS profit
+FROM accounts a
+JOIN operations o            ON o.account_id = a.id
+JOIN operation_categories oc ON oc.id = o.category_id
+JOIN operation_types ot      ON ot.id = oc.operation_type_id
+GROUP BY a.id, a.user_id, a.title, date_trunc('month', o.exec_at);
+
+CREATE OR REPLACE VIEW v_user_monthly_stats AS
+SELECT
+    u.id AS user_id,
+    date_trunc('month', o.exec_at) AS month,
+    COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0) AS income,
+    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS expense,
+    COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0)
+      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS profit
+FROM users u
+JOIN operations o            ON o.user_id = u.id
+JOIN operation_categories oc ON oc.id = o.category_id
+JOIN operation_types ot      ON ot.id = oc.operation_type_id
+GROUP BY u.id, date_trunc('month', o.exec_at);

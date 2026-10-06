@@ -19,6 +19,9 @@ import (
 	operationsRepo "github.com/SJMaks/financer_back/internal/features/operations/repository"
 	operationsService "github.com/SJMaks/financer_back/internal/features/operations/service"
 	operationsTransport "github.com/SJMaks/financer_back/internal/features/operations/transport"
+	statisticsRepo "github.com/SJMaks/financer_back/internal/features/statistics/repository"
+	statisticsService "github.com/SJMaks/financer_back/internal/features/statistics/service"
+	statisticsTransport "github.com/SJMaks/financer_back/internal/features/statistics/transport"
 	usersRepo "github.com/SJMaks/financer_back/internal/features/users/repository"
 	usersService "github.com/SJMaks/financer_back/internal/features/users/service"
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
@@ -71,6 +74,12 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	opsHandler := operationsTransport.NewHandler(log, opsSrv)
 
 	operationsTransport.RegisterPrivateRouter(api, opsHandler, authMiddleware.CheckAuth)
+
+	stcsRepo := statisticsRepo.NewPostgres(db)
+	stcsSrv := statisticsService.NewService(stcsRepo)
+	stcsHandler := statisticsTransport.NewHandler(log, stcsSrv)
+
+	statisticsTransport.RegisterPrivateRouter(api, stcsHandler, authMiddleware.CheckAuth)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),
