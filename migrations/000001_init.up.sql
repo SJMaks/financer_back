@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS accounts
   UNIQUE(id, user_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts (user_id);
+
 CREATE TABLE IF NOT EXISTS operation_types
 (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -38,6 +40,8 @@ CREATE TABLE IF NOT EXISTS operation_categories
   color VARCHAR(7)
 );
 
+CREATE INDEX IF NOT EXISTS idx_operation_categories_user_type ON operation_categories (user_id, operation_type_id);
+
 CREATE TABLE IF NOT EXISTS operations
 (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -54,6 +58,9 @@ CREATE TABLE IF NOT EXISTS operations
         FOREIGN KEY (account_id, user_id)
         REFERENCES accounts (id, user_id)
 );
+
+CREATE INDEX idx_operations_account_id ON operations (account_id);
+CREATE INDEX idx_operations_user_account_exec_at ON operations (user_id, account_id, exec_at ASC);
 
 INSERT INTO operation_types (title) VALUES ('income');
 INSERT INTO operation_types (title) VALUES ('expense');
