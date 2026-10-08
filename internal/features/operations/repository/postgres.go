@@ -57,6 +57,17 @@ func (r *PostgresRepository) GetAllOfAccount(
 	ctx context.Context, params service.ListOperationsParams,
 ) ([]domain.Operation, int64, error) {
 
+	var accountExists bool
+	err := r.db.QueryRow(ctx, `
+	SELECT EXISTS (SELECT 1 FROM accounts WHERE id = $1 AND user_id = $2);
+	`, params.Filter.AccountID, params.Filter.UserID).Scan(&accountExists)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !accountExists {
+		return nil, 0, service.AccountNotFound
+	}
+
 	where := []string{"o.user_id = $1", "o.account_id = $2"}
 	args := []any{params.Filter.UserID, params.Filter.AccountID}
 	i := 3

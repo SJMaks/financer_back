@@ -22,7 +22,27 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	dbConnStr, err := loadEnv("DB_URL")
+	dbHost, err := loadEnv("DB_HOST")
+	if err != nil {
+		return nil, err
+	}
+
+	dbPort, err := loadEnv("DB_PORT")
+	if err != nil {
+		return nil, err
+	}
+
+	dbUser, err := loadEnv("DB_USER")
+	if err != nil {
+		return nil, err
+	}
+
+	dbPass, err := loadEnv("DB_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+
+	dbName, err := loadEnv("DB_NAME")
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +51,8 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 
 	return &Config{
 		HTTPAddr:     httpAddr,
