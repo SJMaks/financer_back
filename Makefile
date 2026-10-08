@@ -1,17 +1,48 @@
 include .env
 export
 
+export PROJECT_ROOT=$(shell pwd)
+
 run:
 	@go run cmd/financer/main.go
 
-docker-up:
-	@docker compose up -d
+env-up:
+	@docker compose up -d financer_postgres
 
-docker-down:
-	@docker compose down
+env-down:
+	@docker compose down financer_postgres
+
+env-port-forward:
+	@docker compose up -d port_forwarder
+
+env-port-close:
+	@docker compose down port_forwarder
+
+migrate-create:
+	@if [ -z "$(seq)" ]; then \
+		echo "'seq' parameter is required. Try 'make migrate-create seq=init'"; \
+		exit 1; \
+	fi; \
+	docker compose run --rm financer_postgres_migrate \
+		create \
+		-ext sql \
+		-dir /migrations \
+		-seq "$(seq)"
 
 migrate-up:
-	@migrate -path migrations -database ${DB_URL} up
+	@make migrate-action action=up
 
 migrate-down:
-	@migrate -path migrations -database ${DB_URL} down
+	@make migrate-action action=down
+
+migrate-action:
+	@if [ -z "$(action)" ]; then \
+		echo "'action' parameter is required. Try 'make migrate-action action=up'"; \
+		exit 1; \
+	fi; \
+	docker compose run --rm financer_postgres_migrate \
+		-path migrations -database postgres://${DB_USER}:${DB_PASSWORD}@financer_postgres:${DB_PORT}/${DB_NAME}?sslmode=disable \
+		"$(action)"
+
+financer-deploy:
+	docker compose up -d --build financer

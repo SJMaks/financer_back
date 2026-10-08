@@ -8,6 +8,7 @@ import (
 
 var (
 	OperationNotFound     = &apperrors.Error{Code: "operation_not_found", Msg: "operation not found", Status: http.StatusNotFound}
+	AccountNotFound       = &apperrors.Error{Code: "account_not_found", Msg: "account not found", Status: http.StatusNotFound}
 	AccountIDRequired     = &apperrors.Error{Code: "account_id_required", Msg: "account id is required", Status: http.StatusBadRequest}
 	CategoryIDRequired    = &apperrors.Error{Code: "category_id_required", Msg: "category id is required", Status: http.StatusBadRequest}
 	TitleRequired         = &apperrors.Error{Code: "title_required", Msg: "title is required", Status: http.StatusBadRequest}
