@@ -9,8 +9,8 @@ run:
 env-up:
 	@docker compose up -d financer_postgres
 
-env-down:
-	@docker compose down financer_postgres
+env-cleanup:
+	@docker compose down -v financer_postgres
 
 env-port-forward:
 	@docker compose up -d port_forwarder
@@ -44,8 +44,11 @@ migrate-action:
 		-path migrations -database postgres://${DB_USER}:${DB_PASSWORD}@financer_postgres:${DB_PORT}/${DB_NAME}?sslmode=disable \
 		"$(action)"
 
+docker-ps:
+	@docker compose ps
+
 financer-deploy:
-	docker compose up -d --build financer
+	@docker compose up -d --build financer
 
 financer-undeploy:
-	docker compose down
+	@docker compose down
