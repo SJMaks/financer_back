@@ -26,6 +26,16 @@ func NewHandler(log *zap.SugaredLogger, srv *service.Service, mid *middleware.Au
 	}
 }
 
+// GetByUser     godoc
+// @Summary      Get by user
+// @Description  Get summary statistics of all user's accounts
+// @Tags         statistics
+// @Security     BearerAuth
+// @Success      200 {object} UserStatisticsSliceDTO "Summary user statistics"
+// @Failure      404 {object} utils.HTTPError "User not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /statistics [get]
 func (h *Handler) GetByUser(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -40,6 +50,18 @@ func (h *Handler) GetByUser(c *gin.Context) {
 	c.JSON(http.StatusOK, ByUserDomainsToSliceDTO(stcs))
 }
 
+// GetByAccount  godoc
+// @Summary      Get by account
+// @Description  Get statistics of the particular account
+// @Tags         statistics
+// @Security     BearerAuth
+// @Param        accountID path int true "Account ID"
+// @Success      200 {object} AccountStatisticsSliceDTO "Account statistics"
+// @Failure      404 {object} utils.HTTPError "Account not found"
+// @Failure      404 {object} utils.HTTPError "User not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts/{accountID}/statistics [get]
 func (h *Handler) GetByAccount(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {

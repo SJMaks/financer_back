@@ -6,7 +6,6 @@ import (
 
 func CreateOperationDTOToDomain(dto *CreateOperationDTO) *domain.Operation {
 	return &domain.Operation{
-		AccountID:   dto.AccountID,
 		CategoryID:  dto.CategoryID,
 		Title:       dto.Title,
 		Description: dto.Description,
