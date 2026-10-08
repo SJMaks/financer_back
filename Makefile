@@ -46,3 +46,6 @@ migrate-action:
 
 financer-deploy:
 	docker compose up -d --build financer
+
+financer-undeploy:
+	docker compose down
