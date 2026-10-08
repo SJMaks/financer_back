@@ -49,7 +49,7 @@ func (a *AuthMiddleware) CheckAuth(c *gin.Context) {
 	c.Next()
 }
 
-func UserFromContext(c *gin.Context) (*auth.TokenPayload, bool) {
+func (a *AuthMiddleware) UserFromContext(c *gin.Context) (*auth.TokenPayload, bool) {
 	v, ok := c.Get(string(userCtxKey))
 	if !ok {
 		return nil, false

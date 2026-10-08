@@ -15,17 +15,19 @@ import (
 type Handler struct {
 	log *zap.SugaredLogger
 	srv *service.Service
+	mid *middleware.AuthMiddleware
 }
 
-func NewHandler(log *zap.SugaredLogger, srv *service.Service) *Handler {
+func NewHandler(log *zap.SugaredLogger, srv *service.Service, mid *middleware.AuthMiddleware) *Handler {
 	return &Handler{
 		log: log,
 		srv: srv,
+		mid: mid,
 	}
 }
 
 func (h *Handler) Create(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -49,7 +51,7 @@ func (h *Handler) Create(c *gin.Context) {
 }
 
 func (h *Handler) GetAllOfUser(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -63,7 +65,7 @@ func (h *Handler) GetAllOfUser(c *gin.Context) {
 }
 
 func (h *Handler) GetByID(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -87,7 +89,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 }
 
 func (h *Handler) UpdateByID(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -122,7 +124,7 @@ func (h *Handler) UpdateByID(c *gin.Context) {
 }
 
 func (h *Handler) DeleteByID(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return

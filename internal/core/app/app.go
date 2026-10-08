@@ -46,20 +46,20 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 
 	usersRepo := usersRepo.NewPostgres(db)
 	usersSrv := usersService.NewService(usersRepo, jwt)
-	usersHandler := usersTransport.NewHandler(usersSrv, log)
+	usersHandler := usersTransport.NewHandler(usersSrv, log, authMiddleware)
 
 	usersTransport.RegisterPublicRouter(api, usersHandler)
 	usersTransport.RegisterPrivateRouter(api, usersHandler, authMiddleware.CheckAuth)
 
 	accsRepo := accountsRepo.NewPostgres(db)
 	accsSrv := accountsService.NewService(accsRepo)
-	accsHandler := accountsTransport.NewHandler(log, accsSrv)
+	accsHandler := accountsTransport.NewHandler(log, accsSrv, authMiddleware)
 
 	accountsTransport.RegisterPrivateRouter(api, accsHandler, authMiddleware.CheckAuth)
 
 	ctgRepo := categoriesRepo.NewPostgres(db)
 	ctgSrv := categoriesService.NewService(ctgRepo)
-	ctgHandler := categoriesTransport.NewHandler(log, ctgSrv)
+	ctgHandler := categoriesTransport.NewHandler(log, ctgSrv, authMiddleware)
 
 	categoriesTransport.RegisterPrivateRouter(api, ctgHandler, authMiddleware.CheckAuth)
 
@@ -71,13 +71,13 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 
 	opsRepo := operationsRepo.NewPostgres(db)
 	opsSrv := operationsService.NewService(opsRepo)
-	opsHandler := operationsTransport.NewHandler(log, opsSrv)
+	opsHandler := operationsTransport.NewHandler(log, opsSrv, authMiddleware)
 
 	operationsTransport.RegisterPrivateRouter(api, opsHandler, authMiddleware.CheckAuth)
 
 	stcsRepo := statisticsRepo.NewPostgres(db)
 	stcsSrv := statisticsService.NewService(stcsRepo)
-	stcsHandler := statisticsTransport.NewHandler(log, stcsSrv)
+	stcsHandler := statisticsTransport.NewHandler(log, stcsSrv, authMiddleware)
 
 	statisticsTransport.RegisterPrivateRouter(api, stcsHandler, authMiddleware.CheckAuth)
 

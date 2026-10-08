@@ -1,25 +1,40 @@
 package transport
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/SJMaks/financer_back/internal/core/apperrors"
-	"github.com/SJMaks/financer_back/internal/core/middleware"
+	"github.com/SJMaks/financer_back/internal/core/auth"
 	"github.com/SJMaks/financer_back/internal/core/utils"
-	"github.com/SJMaks/financer_back/internal/features/users/service"
+	"github.com/SJMaks/financer_back/internal/features/users/domain"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-type Handler struct {
-	srv *service.Service
-	log *zap.SugaredLogger
+type UserService interface {
+	Register(ctx context.Context, u *domain.User, password string) (*domain.User, error)
+	Login(ctx context.Context, u *domain.User) (string, error)
+	GetByID(ctx context.Context, id int64) (*domain.User, error)
+	UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error)
+	DeleteByID(ctx context.Context, id int64) error
 }
 
-func NewHandler(srv *service.Service, log *zap.SugaredLogger) *Handler {
+type AuthMiddleware interface {
+	UserFromContext(c *gin.Context) (*auth.TokenPayload, bool)
+}
+
+type Handler struct {
+	srv UserService
+	log *zap.SugaredLogger
+	mid AuthMiddleware
+}
+
+func NewHandler(srv UserService, log *zap.SugaredLogger, mid AuthMiddleware) *Handler {
 	return &Handler{
 		srv: srv,
 		log: log,
+		mid: mid,
 	}
 }
 
@@ -64,7 +79,7 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func (h *Handler) GetMe(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -79,7 +94,7 @@ func (h *Handler) GetMe(c *gin.Context) {
 }
 
 func (h *Handler) UpdateMe(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return
@@ -105,7 +120,7 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 }
 
 func (h *Handler) DeleteMe(c *gin.Context) {
-	p, ok := middleware.UserFromContext(c)
+	p, ok := h.mid.UserFromContext(c)
 	if !ok {
 		utils.WriteHTTPError(c, h.log, apperrors.Unauthorized)
 		return

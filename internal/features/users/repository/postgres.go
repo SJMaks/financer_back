@@ -21,7 +21,7 @@ func NewPostgres(db *pgxpool.Pool) *PostgresRepository {
 	}
 }
 
-var _ service.Repository = (*PostgresRepository)(nil)
+var _ service.UserRepository = (*PostgresRepository)(nil)
 
 func (r *PostgresRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
 	qry := `SELECT id, version, login, pass_hash, full_name FROM users WHERE login = $1;`
