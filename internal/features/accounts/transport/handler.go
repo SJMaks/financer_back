@@ -26,6 +26,19 @@ func NewHandler(log *zap.SugaredLogger, srv *service.Service, mid *middleware.Au
 	}
 }
 
+// Create        godoc
+// @Summary      Create account
+// @Description  Create a new account
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body CreateAccountDTO true "Create account request body"
+// @Success      200 {object} ResponseAccountDTO "Created account information"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts [post]
 func (h *Handler) Create(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -50,6 +63,16 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, DomainToResponseDTO(res))
 }
 
+// GetAllOfUser  godoc
+// @Summary      Get accounts
+// @Description  Get all accounts of the current user
+// @Tags         accounts
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} ResponseAccountsDTO "All user's accounts"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts [get]
 func (h *Handler) GetAllOfUser(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -64,6 +87,18 @@ func (h *Handler) GetAllOfUser(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainsToResponseDTO(accs))
 }
 
+// GetByID       godoc
+// @Summary      Get account
+// @Description  Get one account by ID
+// @Tags         accounts
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path int true "Account ID"
+// @Success      200 {object} ResponseAccountDTO "Account information"
+// @Failure      404 {object} utils.HTTPError "Account not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -88,6 +123,21 @@ func (h *Handler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainToResponseDTO(acc))
 }
 
+// UpdateByID    godoc
+// @Summary      Update account
+// @Description  Update an account by ID
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path int true "Account ID"
+// @Param        request body UpdateAccountDTO true "Update account body"
+// @Success      200 {object} ResponseAccountDTO "Updated account information"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      404 {object} utils.HTTPError "Account not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts/{id} [patch]
 func (h *Handler) UpdateByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -123,6 +173,17 @@ func (h *Handler) UpdateByID(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainToResponseDTO(acc))
 }
 
+// DeleteByID    godoc
+// @Summary      Delete account
+// @Description  Delete an account by ID
+// @Tags         accounts
+// @Security     BearerAuth
+// @Param        id path int true "Account ID"
+// @Success      204
+// @Failure      404 {object} utils.HTTPError "Account not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /accounts/{id} [delete]
 func (h *Handler) DeleteByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {

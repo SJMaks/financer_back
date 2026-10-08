@@ -26,6 +26,19 @@ func NewHandler(log *zap.SugaredLogger, srv *service.Service, mid *middleware.Au
 	}
 }
 
+// Create        godoc
+// @Summary      Create category
+// @Description  Create a new category
+// @Tags         categories
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body CreateCategoryDTO true "Create category request body"
+// @Success      200 {object} ResponseCategoryDTO "Created category information"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /categories [post]
 func (h *Handler) Create(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -50,6 +63,16 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, DomainToResponseDTO(res))
 }
 
+// GetAllOfUser  godoc
+// @Summary      Get categories
+// @Description  Get all categories of the current user
+// @Tags         categories
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} ResponseCategoriesDTO "All user's categories"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /categories [get]
 func (h *Handler) GetAllOfUser(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -64,6 +87,18 @@ func (h *Handler) GetAllOfUser(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainsToResponseDTO(ctgs))
 }
 
+// GetByID       godoc
+// @Summary      Get category
+// @Description  Get one category by ID
+// @Tags         categories
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path int true "Category ID"
+// @Success      200 {object} ResponseCategoryDTO "Category information"
+// @Failure      404 {object} utils.HTTPError "Category not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /categories/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -88,6 +123,21 @@ func (h *Handler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainToResponseDTO(ctg))
 }
 
+// UpdateByID    godoc
+// @Summary      Update category
+// @Description  Update an category by ID
+// @Tags         categories
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path int true "Category ID"
+// @Param        request body UpdateCategoryDTO true "Update category body"
+// @Success      200 {object} ResponseCategoryDTO "Updated category information"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      404 {object} utils.HTTPError "Category not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /categories/{id} [patch]
 func (h *Handler) UpdateByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -123,6 +173,17 @@ func (h *Handler) UpdateByID(c *gin.Context) {
 	c.JSON(http.StatusOK, DomainToResponseDTO(res))
 }
 
+// DeleteByID    godoc
+// @Summary      Delete category
+// @Description  Delete an category by ID
+// @Tags         categories
+// @Security     BearerAuth
+// @Param        id path int true "Category ID"
+// @Success      204
+// @Failure      404 {object} utils.HTTPError "Category not found"
+// @Failure      401 {object} utils.HTTPError "Unauthorized"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /categories/{id} [delete]
 func (h *Handler) DeleteByID(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {

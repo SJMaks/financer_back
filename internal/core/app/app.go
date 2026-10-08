@@ -27,6 +27,8 @@ import (
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 )
 
@@ -40,9 +42,10 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 
 	jwt := auth.NewJWT(cfg)
 
+	commonMiddleware := middleware.NewCommonMiddleware(log, cfg)
 	authMiddleware := middleware.NewAuthMiddleware(log, jwt)
 
-	api := engine.Group("/api/v1")
+	api := engine.Group("/api/v1", commonMiddleware.CORS)
 
 	usersRepo := usersRepo.NewPostgres(db)
 	usersSrv := usersService.NewService(usersRepo, jwt)
@@ -80,6 +83,8 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	stcsHandler := statisticsTransport.NewHandler(log, stcsSrv, authMiddleware)
 
 	statisticsTransport.RegisterPrivateRouter(api, stcsHandler, authMiddleware.CheckAuth)
+
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler), commonMiddleware.CORS)
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),

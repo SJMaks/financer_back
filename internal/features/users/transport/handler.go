@@ -38,6 +38,18 @@ func NewHandler(srv UserService, log *zap.SugaredLogger, mid AuthMiddleware) *Ha
 	}
 }
 
+// Register      godoc
+// @Summary      Register a user
+// @Description  Resgister a new user in the app
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body UserRegisterDTO true "Register request body"
+// @Success      201 {object} UserResponseDTO "Successfully registered user"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      409 {object} utils.HTTPError "User already exists"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	dto := &UserRegisterDTO{}
 	if err := c.ShouldBindJSON(dto); err != nil {
@@ -58,6 +70,18 @@ func (h *Handler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, u)
 }
 
+// Login         godoc
+// @Summary      Log in
+// @Description  Log in to the app
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body LoginRequestDTO true "Login request body"
+// @Success      200 {object} LoginResponseDTO "JWT of a successfully authenticated user"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      401 {object} utils.HTTPError "Invalid credentials"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	dto := &LoginRequestDTO{}
 	if err := c.ShouldBindJSON(dto); err != nil {
@@ -78,6 +102,17 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
+// GetMe         godoc
+// @Summary      Get current
+// @Description  Get current user information
+// @Tags         users
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} UserResponseDTO "Current user information"
+// @Failure      404 {object} utils.HTTPError "User not found"
+// @Failure      401 {object} utils.HTTPError "Invalid JWT"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /users/me [get]
 func (h *Handler) GetMe(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -93,6 +128,20 @@ func (h *Handler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// UpdateMe      godoc
+// @Summary      Update current
+// @Description  Update current user information
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body UpdateRequestDTO true "Update request body"
+// @Success      200 {object} UserResponseDTO "Updated user information"
+// @Failure      400 {object} utils.HTTPError "Bad request"
+// @Failure      404 {object} utils.HTTPError "User not found"
+// @Failure      401 {object} utils.HTTPError "Invalid JWT"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /users/me [patch]
 func (h *Handler) UpdateMe(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {
@@ -119,6 +168,16 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// DeleteMe      godoc
+// @Summary      Delete current
+// @Description  Delete current user
+// @Tags         users
+// @Security     BearerAuth
+// @Success      204 "User successfully deleted"
+// @Failure      404 {object} utils.HTTPError "User not found"
+// @Failure      401 {object} utils.HTTPError "Invalid JWT"
+// @Failure      500 {object} utils.HTTPError "Internal error"
+// @Router       /users/me [delete]
 func (h *Handler) DeleteMe(c *gin.Context) {
 	p, ok := h.mid.UserFromContext(c)
 	if !ok {

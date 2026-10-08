@@ -47,6 +47,14 @@ migrate-action:
 docker-ps:
 	@docker compose ps
 
+swagger-gen:
+	@docker compose run --rm swagger \
+		init \
+		-g cmd/financer/main.go \
+		-o docs \
+		--parseInternal \
+		--parseDependency
+
 financer-deploy:
 	@docker compose up -d --build financer
 

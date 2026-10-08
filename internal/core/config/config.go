@@ -14,6 +14,8 @@ type Config struct {
 	JWTSecret string
 
 	DBConnString string
+
+	AllowedOrigins map[string]struct{}
 }
 
 func LoadConfig() (*Config, error) {
@@ -54,10 +56,16 @@ func LoadConfig() (*Config, error) {
 
 	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 
+	allowedOrigins := map[string]struct{}{
+		"http://127.0.0.1:8000": {},
+		"http://localhost:8000": {},
+	}
+
 	return &Config{
-		HTTPAddr:     httpAddr,
-		JWTSecret:    jwtSecret,
-		DBConnString: dbConnStr,
+		HTTPAddr:       httpAddr,
+		JWTSecret:      jwtSecret,
+		DBConnString:   dbConnStr,
+		AllowedOrigins: allowedOrigins,
 	}, nil
 }
 

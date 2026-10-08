@@ -14,7 +14,20 @@ import (
 	"github.com/SJMaks/financer_back/internal/core/config"
 	"github.com/SJMaks/financer_back/internal/core/database"
 	"github.com/SJMaks/financer_back/internal/core/logger"
+
+	_ "github.com/SJMaks/financer_back/docs"
 )
+
+// @title       Financer API
+// @version    1.0
+// @description Finance Application REST-API scheme
+// @host        localhost:8080
+// @BasePath    /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 Type "Bearer" followed by a space and the JWT token.
 
 func main() {
 	if err := run(); err != nil {
