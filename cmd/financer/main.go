@@ -21,7 +21,7 @@ import (
 // @title       Financer API
 // @version    1.0
 // @description Finance Application REST-API scheme
-// @host        localhost:8080
+// @host        localhost:8000
 // @BasePath    /api/v1
 
 // @securityDefinitions.apikey  BearerAuth

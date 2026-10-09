@@ -545,6 +545,54 @@ func TestHandler_UpdateMe(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:  "service currency required error",
+			token: "1",
+			body: `{
+				"currency": ""
+			}`,
+			setupMock: func(mid *MockAuthMiddleware, srv *MockUserService) {
+				mid.EXPECT().UserFromContext(
+					mock.Anything,
+				).Return(&auth.TokenPayload{
+					ID:    1,
+					Login: "alice",
+				}, true)
+				currency := ""
+				srv.EXPECT().UpdateByID(
+					mock.Anything,
+					&domain.PatchUser{
+						ID:       1,
+						Currency: &currency,
+					},
+				).Return(nil, service.CurrencyRequired)
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:  "service invalid currency error",
+			token: "1",
+			body: `{
+				"currency": "dollar 123"
+			}`,
+			setupMock: func(mid *MockAuthMiddleware, srv *MockUserService) {
+				mid.EXPECT().UserFromContext(
+					mock.Anything,
+				).Return(&auth.TokenPayload{
+					ID:    1,
+					Login: "alice",
+				}, true)
+				currency := "dollar 123"
+				srv.EXPECT().UpdateByID(
+					mock.Anything,
+					&domain.PatchUser{
+						ID:       1,
+						Currency: &currency,
+					},
+				).Return(nil, service.InvalidCurrency)
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
 			name:  "service internal error",
 			token: "1",
 			body: `{

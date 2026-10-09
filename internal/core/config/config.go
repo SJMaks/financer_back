@@ -59,6 +59,8 @@ func LoadConfig() (*Config, error) {
 	allowedOrigins := map[string]struct{}{
 		"http://127.0.0.1:8000": {},
 		"http://localhost:8000": {},
+		"http://localhost:5173": {},
+		"http://127.0.0.1:5173": {},
 	}
 
 	return &Config{

@@ -9,6 +9,7 @@ type UserRegisterDTO struct {
 type UserResponseDTO struct {
 	Login    string `json:"login" example:"alice"`
 	Fullname string `json:"full_name" example:"Alice White"`
+	Currency string `json:"currency" example:"dollar"`
 }
 
 type LoginRequestDTO struct {
@@ -18,6 +19,7 @@ type LoginRequestDTO struct {
 
 type UpdateRequestDTO struct {
 	Fullname *string `json:"full_name" example:"Alice Pink"`
+	Currency *string `json:"currency" example:"euro"`
 }
 
 type LoginResponseDTO struct {

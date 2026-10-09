@@ -6,6 +6,7 @@ type User struct {
 	Login    string
 	Password string
 	Fullname string
+	Currency string
 }
 
 type PatchUser struct {
@@ -13,4 +14,5 @@ type PatchUser struct {
 	Version  int64
 	Login    string
 	Fullname *string
+	Currency *string
 }

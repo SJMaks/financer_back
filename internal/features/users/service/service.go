@@ -33,11 +33,12 @@ func NewService(repo UserRepository, tm auth.TokenManager) *Service {
 }
 
 var (
-	reLoginAllowed = regexp.MustCompile(`^[A-Za-z0-9]{5,30}$`)
-	reNameAllowed  = regexp.MustCompile(`^[\p{L}]+(?: [\p{L}]+)*$`)
-	rePassAllowed  = regexp.MustCompile(`^[A-Za-z0-9]{5,50}$`)
-	rePassUpper    = regexp.MustCompile(`[A-Z]`)
-	rePassDigit    = regexp.MustCompile(`[0-9]`)
+	reLoginAllowed    = regexp.MustCompile(`^[A-Za-z0-9]{5,30}$`)
+	reNameAllowed     = regexp.MustCompile(`^[\p{L}]+(?: [\p{L}]+)*$`)
+	rePassAllowed     = regexp.MustCompile(`^[A-Za-z0-9]{5,50}$`)
+	reCurrencyAllowed = regexp.MustCompile(`^[A-Za-z]$`)
+	rePassUpper       = regexp.MustCompile(`[A-Z]`)
+	rePassDigit       = regexp.MustCompile(`[0-9]`)
 )
 
 func validateLogin(l string) bool {
@@ -52,6 +53,10 @@ func validatePassword(p string) bool {
 
 func validateFullname(f string) bool {
 	return reNameAllowed.MatchString(f)
+}
+
+func validateCurrency(c string) bool {
+	return reCurrencyAllowed.MatchString(c)
 }
 
 func (s *Service) Register(ctx context.Context, u *domain.User, password string) (*domain.User, error) {
@@ -142,6 +147,18 @@ func (s *Service) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.
 		}
 		if utf8.RuneCountInString(fullname) > 100 {
 			return nil, InvalidFullname
+		}
+	}
+	if u.Currency != nil {
+		currency := strings.TrimSpace(*u.Currency)
+		if currency == "" {
+			return nil, CurrencyRequired
+		}
+		if currencyOk := validateCurrency(currency); !currencyOk {
+			return nil, InvalidCurrency
+		}
+		if utf8.RuneCountInString(currency) > 50 {
+			return nil, InvalidCurrency
 		}
 	}
 
