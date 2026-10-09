@@ -14,6 +14,7 @@ func DomainToResponse(u domain.User) *UserResponseDTO {
 	return &UserResponseDTO{
 		Login:    u.Login,
 		Fullname: u.Fullname,
+		Currency: u.Currency,
 	}
 }
 
@@ -27,5 +28,6 @@ func LoginDTOToDomain(dto LoginRequestDTO) *domain.User {
 func UpdateDTOToDomain(dto UpdateRequestDTO) *domain.PatchUser {
 	return &domain.PatchUser{
 		Fullname: dto.Fullname,
+		Currency: dto.Currency,
 	}
 }

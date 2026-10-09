@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8000",
     "basePath": "/api/v1",
     "paths": {
         "/accounts": {
@@ -1677,6 +1677,10 @@
         "internal_features_users_transport.UpdateRequestDTO": {
             "type": "object",
             "properties": {
+                "currency": {
+                    "type": "string",
+                    "example": "euro"
+                },
                 "full_name": {
                     "type": "string",
                     "example": "Alice Pink"
@@ -1703,6 +1707,10 @@
         "internal_features_users_transport.UserResponseDTO": {
             "type": "object",
             "properties": {
+                "currency": {
+                    "type": "string",
+                    "example": "dollar"
+                },
                 "full_name": {
                     "type": "string",
                     "example": "Alice White"

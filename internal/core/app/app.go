@@ -45,6 +45,7 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	commonMiddleware := middleware.NewCommonMiddleware(log, cfg)
 	authMiddleware := middleware.NewAuthMiddleware(log, jwt)
 
+	engine.Use(commonMiddleware.CORS)
 	api := engine.Group("/api/v1", commonMiddleware.CORS)
 
 	usersRepo := usersRepo.NewPostgres(db)

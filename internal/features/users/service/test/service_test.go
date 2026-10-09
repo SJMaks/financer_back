@@ -374,6 +374,8 @@ func TestService_UpdateByID(t *testing.T) {
 	newFullname := "Alice White"
 	emptyFullname := ""
 	invalidFullname := "Alice123"
+	emptyCurrency := ""
+	invalidCurrency := "dollar 123"
 
 	tests := []struct {
 		name      string
@@ -421,6 +423,26 @@ func TestService_UpdateByID(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: service.InvalidFullname,
+		},
+		{
+			name:      "currency required error",
+			setupMock: func(repo *MockUserRepository, u *domain.PatchUser, user *domain.User) {},
+			u: &domain.PatchUser{
+				ID:       1,
+				Currency: &emptyCurrency,
+			},
+			want:    nil,
+			wantErr: service.CurrencyRequired,
+		},
+		{
+			name:      "invalid currency",
+			setupMock: func(repo *MockUserRepository, u *domain.PatchUser, user *domain.User) {},
+			u: &domain.PatchUser{
+				ID:       1,
+				Currency: &invalidCurrency,
+			},
+			want:    nil,
+			wantErr: service.InvalidCurrency,
 		},
 		{
 			name: "repo internal error",

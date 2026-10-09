@@ -24,9 +24,9 @@ func NewPostgres(db *pgxpool.Pool) *PostgresRepository {
 var _ service.UserRepository = (*PostgresRepository)(nil)
 
 func (r *PostgresRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
-	qry := `SELECT id, version, login, pass_hash, full_name FROM users WHERE login = $1;`
+	qry := `SELECT id, version, login, pass_hash, full_name, currency FROM users WHERE login = $1;`
 	u := &domain.User{}
-	err := r.db.QueryRow(ctx, qry, login).Scan(&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname)
+	err := r.db.QueryRow(ctx, qry, login).Scan(&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname, &u.Currency)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, service.UserNotFound
 	}
@@ -37,10 +37,10 @@ func (r *PostgresRepository) GetByLogin(ctx context.Context, login string) (*dom
 }
 
 func (r *PostgresRepository) Create(ctx context.Context, u *domain.User) (*domain.User, error) {
-	qry := `INSERT INTO users (login, pass_hash, full_name) VALUES ($1, $2, $3)
-	RETURNING id, version, login, pass_hash, full_name;`
+	qry := `INSERT INTO users (login, pass_hash, full_name, currency) VALUES ($1, $2, $3, 'dollar')
+	RETURNING id, version, login, pass_hash, full_name, currency;`
 	err := r.db.QueryRow(ctx, qry, u.Login, u.Password, u.Fullname).Scan(
-		&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname)
+		&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname, &u.Currency)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return nil, service.UserAlreadyExists
@@ -52,10 +52,10 @@ func (r *PostgresRepository) Create(ctx context.Context, u *domain.User) (*domai
 }
 
 func (r *PostgresRepository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
-	qry := `SELECT id, version, login, pass_hash, full_name FROM users
+	qry := `SELECT id, version, login, pass_hash, full_name, currency FROM users
 	WHERE id = $1`
 	u := &domain.User{}
-	err := r.db.QueryRow(ctx, qry, id).Scan(&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname)
+	err := r.db.QueryRow(ctx, qry, id).Scan(&u.ID, &u.Version, &u.Login, &u.Password, &u.Fullname, &u.Currency)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, service.UserNotFound
 	}
@@ -68,11 +68,12 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id int64) (*domain.Use
 // TODO: если возникнет оптимистичной блокировки, реализовать UpdateByIDWithVersion
 func (r *PostgresRepository) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error) {
 	qry := `UPDATE users SET full_name = COALESCE($1, full_name),
-	version = version + 1 WHERE id = $2 RETURNING
-	id, version, login, pass_hash, full_name;`
+	SET full_name = COALESCE($2, currency),
+	version = version + 1 WHERE id = $3 RETURNING
+	id, version, login, pass_hash, full_name, currency;`
 	user := &domain.User{}
-	err := r.db.QueryRow(ctx, qry, u.Fullname, u.ID).Scan(
-		&user.ID, &user.Version, &user.Login, &user.Password, &user.Fullname)
+	err := r.db.QueryRow(ctx, qry, u.Fullname, u.Currency, u.ID).Scan(
+		&user.ID, &user.Version, &user.Login, &user.Password, &user.Fullname, &user.Currency)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, service.UserNotFound
 	}

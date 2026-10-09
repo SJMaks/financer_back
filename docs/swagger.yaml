@@ -304,6 +304,9 @@ definitions:
     type: object
   internal_features_users_transport.UpdateRequestDTO:
     properties:
+      currency:
+        example: euro
+        type: string
       full_name:
         example: Alice Pink
         type: string
@@ -322,6 +325,9 @@ definitions:
     type: object
   internal_features_users_transport.UserResponseDTO:
     properties:
+      currency:
+        example: dollar
+        type: string
       full_name:
         example: Alice White
         type: string
@@ -329,7 +335,7 @@ definitions:
         example: alice
         type: string
     type: object
-host: localhost:8080
+host: localhost:8000
 info:
   contact: {}
   description: Finance Application REST-API scheme
