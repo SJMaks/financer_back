@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS accounts
 (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
-  user_id BIGINT REFERENCES users(id) NOT NULL,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   title VARCHAR(50) NOT NULL,
   description VARCHAR(500),
   icon VARCHAR(50),
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS operation_categories
 (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   version BIGINT NOT NULL DEFAULT 0,
-  user_id BIGINT REFERENCES users(id),
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   operation_type_id BIGINT REFERENCES operation_types(id) NOT NULL,
   title VARCHAR(50) NOT NULL,
   icon VARCHAR(50),
@@ -56,8 +56,9 @@ CREATE TABLE IF NOT EXISTS operations
   sum NUMERIC(20,2) NOT NULL,
 
   CONSTRAINT operations_account_owner_fk
-        FOREIGN KEY (account_id, user_id)
-        REFERENCES accounts (id, user_id)
+    FOREIGN KEY (account_id, user_id)
+    REFERENCES accounts (id, user_id)
+    ON DELETE CASCADE
 );
 
 CREATE INDEX idx_operations_account_id ON operations (account_id);
@@ -72,9 +73,9 @@ SELECT
     a.user_id,
     date_trunc('month', o.exec_at) AS month,
     COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0) AS income,
-    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS expense,
+    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN ABS(o.sum) ELSE 0 END), 0) AS expense,
     COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0)
-      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS profit
+      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN ABS(o.sum) ELSE 0 END), 0) AS profit
 FROM accounts a
 JOIN operations o            ON o.account_id = a.id
 JOIN operation_categories oc ON oc.id = o.category_id
@@ -86,9 +87,9 @@ SELECT
     u.id AS user_id,
     date_trunc('month', o.exec_at) AS month,
     COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0) AS income,
-    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS expense,
+    COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN ABS(o.sum) ELSE 0 END), 0) AS expense,
     COALESCE(SUM(CASE WHEN ot.title = 'income'  THEN o.sum ELSE 0 END), 0)
-      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN o.sum ELSE 0 END), 0) AS profit
+      - COALESCE(SUM(CASE WHEN ot.title = 'expense' THEN ABS(o.sum) ELSE 0 END), 0) AS profit
 FROM users u
 JOIN operations o            ON o.user_id = u.id
 JOIN operation_categories oc ON oc.id = o.category_id

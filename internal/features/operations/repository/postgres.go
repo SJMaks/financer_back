@@ -26,7 +26,7 @@ var _ service.Repository = (*PostgresRepository)(nil)
 
 func (r *PostgresRepository) Create(ctx context.Context, o *domain.Operation) (*domain.Operation, error) {
 	qry := `INSERT INTO operations (user_id, account_id, category_id, title, description, exec_at, sum) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING 
+	VALUES ($1, $2, $3, $4, $5, $6, ABS($7)) RETURNING 
 	id, version, user_id, account_id, category_id, title, description, exec_at, sum;`
 	operation := &domain.Operation{}
 	err := r.db.QueryRow(ctx, qry,
@@ -171,7 +171,7 @@ func (r *PostgresRepository) UpdateByID(ctx context.Context, c *domain.PatchOper
 	title = COALESCE($2, title),
 	description = COALESCE($3, description),
 	exec_at = COALESCE($4, exec_at),
-	sum = COALESCE($5, sum)
+	sum = COALESCE(ABS($5), sum)
 	WHERE id = $6 AND user_id = $7 AND version = $8
 	RETURNING id, version, user_id, account_id, category_id, title, description, exec_at, sum;`
 	operation := &domain.Operation{}
