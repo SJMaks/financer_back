@@ -14,7 +14,6 @@ var (
 	TitleRequired         = &apperrors.Error{Code: "title_required", Msg: "title is required", Status: http.StatusBadRequest}
 	InvalidTitle          = &apperrors.Error{Code: "invalid_title", Msg: "invalid title", Status: http.StatusBadRequest}
 	InvalidDescription    = &apperrors.Error{Code: "invalid_description", Msg: "invalid description", Status: http.StatusBadRequest}
-	InvalidSum            = &apperrors.Error{Code: "invalid_sum", Msg: "invalid sum", Status: http.StatusBadRequest}
 	InvalidExecAt         = &apperrors.Error{Code: "invalid_exec_at", Msg: "invalid executed at date", Status: http.StatusBadRequest}
 	MissingAccountID      = &apperrors.Error{Code: "missing_id", Msg: "missing account id", Status: http.StatusBadRequest}
 	InvalidAccountID      = &apperrors.Error{Code: "invalid_id", Msg: "invalid account id", Status: http.StatusBadRequest}

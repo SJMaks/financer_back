@@ -57,9 +57,6 @@ func (s *Service) Create(ctx context.Context, o *domain.Operation) (*domain.Oper
 	if o.ExecutedAt.IsZero() {
 		o.ExecutedAt = time.Now()
 	}
-	if o.Sum < 0 {
-		return nil, InvalidSum
-	}
 	return s.repo.Create(ctx, o)
 }
 
@@ -95,9 +92,6 @@ func (s *Service) UpdateByID(ctx context.Context, o *domain.PatchOperation) (*do
 	}
 	if utf8.RuneCountInString(description) > 500 {
 		return nil, InvalidDescription
-	}
-	if o.Sum != nil && *o.Sum < 0 {
-		return nil, InvalidSum
 	}
 	if o.ExecutedAt != nil && o.ExecutedAt.IsZero() {
 		return nil, InvalidExecAt

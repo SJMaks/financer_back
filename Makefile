@@ -9,6 +9,9 @@ run:
 env-up:
 	@docker compose up -d financer_postgres
 
+env-down:
+	@docker compose down financer_postgres
+
 env-cleanup:
 	@docker compose down -v financer_postgres
 

@@ -1,25 +1,3 @@
-CREATE OR REPLACE FUNCTION operation_signed_sum(
-    p_category_id BIGINT,
-    p_sum         NUMERIC
-) RETURNS NUMERIC AS $$
-DECLARE
-    v_type_title VARCHAR(50);
-BEGIN
-    SELECT ot.title
-      INTO STRICT v_type_title
-      FROM operation_categories oc
-      JOIN operation_types ot ON ot.id = oc.operation_type_id
-     WHERE oc.id = p_category_id;
-
-    CASE v_type_title
-        WHEN 'income'  THEN RETURN  p_sum;
-        WHEN 'expense' THEN RETURN -p_sum;
-        ELSE
-            RAISE EXCEPTION 'Unknown operation type title: %', v_type_title;
-    END CASE;
-END;
-$$ LANGUAGE plpgsql STABLE;
-
 CREATE OR REPLACE FUNCTION calculate_balance()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -28,11 +6,11 @@ DECLARE
 BEGIN
     IF TG_OP = 'INSERT' THEN
         v_account_id := NEW.account_id;
-        v_delta := operation_signed_sum(NEW.category_id, NEW.sum);
+        v_delta := NEW.sum;
 
     ELSIF TG_OP = 'DELETE' THEN
         v_account_id := OLD.account_id;
-        v_delta := -operation_signed_sum(OLD.category_id, OLD.sum);
+        v_delta := -OLD.sum;
 
     ELSIF TG_OP = 'UPDATE' THEN
         IF NEW.account_id <> OLD.account_id THEN
@@ -40,8 +18,8 @@ BEGIN
         END IF;
 
         v_account_id := NEW.account_id;
-        v_delta := operation_signed_sum(NEW.category_id, NEW.sum)
-                 - operation_signed_sum(OLD.category_id, OLD.sum);
+        v_delta := NEW.sum
+                 - OLD.sum;
     END IF;
 
     IF v_delta <> 0 THEN

@@ -48,6 +48,20 @@ func (r *PostgresRepository) Create(ctx context.Context, u *domain.User) (*domai
 	if err != nil {
 		return nil, err
 	}
+
+	categoriesQry := `INSERT INTO operation_categories (user_id, operation_type_id, title, icon, color) 
+	VALUES ($1, 1, 'no_category', 'Receipt', '#828282');`
+	_, err = r.db.Exec(ctx, categoriesQry, u.ID)
+	if err != nil {
+		return nil, err
+	}
+	categoriesQry = `INSERT INTO operation_categories (user_id, operation_type_id, title, icon, color) 
+	VALUES ($1, 2, 'no_category', 'Receipt', '#828282');`
+	_, err = r.db.Exec(ctx, categoriesQry, u.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return u, nil
 }
 
@@ -68,7 +82,7 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id int64) (*domain.Use
 // TODO: если возникнет оптимистичной блокировки, реализовать UpdateByIDWithVersion
 func (r *PostgresRepository) UpdateByID(ctx context.Context, u *domain.PatchUser) (*domain.User, error) {
 	qry := `UPDATE users SET full_name = COALESCE($1, full_name),
-	SET full_name = COALESCE($2, currency),
+	currency = COALESCE($2, currency),
 	version = version + 1 WHERE id = $3 RETURNING
 	id, version, login, pass_hash, full_name, currency;`
 	user := &domain.User{}

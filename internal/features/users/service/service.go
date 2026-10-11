@@ -36,7 +36,7 @@ var (
 	reLoginAllowed    = regexp.MustCompile(`^[A-Za-z0-9]{5,30}$`)
 	reNameAllowed     = regexp.MustCompile(`^[\p{L}]+(?: [\p{L}]+)*$`)
 	rePassAllowed     = regexp.MustCompile(`^[A-Za-z0-9]{5,50}$`)
-	reCurrencyAllowed = regexp.MustCompile(`^[A-Za-z]$`)
+	reCurrencyAllowed = regexp.MustCompile(`^[A-Za-z]{1,50}$`)
 	rePassUpper       = regexp.MustCompile(`[A-Z]`)
 	rePassDigit       = regexp.MustCompile(`[0-9]`)
 )
