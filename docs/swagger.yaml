@@ -335,7 +335,7 @@ definitions:
         example: alice
         type: string
     type: object
-host: localhost:8000
+host: api.financerapp.ru
 info:
   contact: {}
   description: Finance Application REST-API scheme
