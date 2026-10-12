@@ -6,6 +6,7 @@ services:
     container_name: financer
     environment:
       - HTTP_ADDRESS=${HTTP_ADDRESS}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       - JWT_SECRET=${JWT_SECRET}
       - DB_HOST=financer_postgres
       - DB_PORT=${DB_PORT}
@@ -15,7 +16,7 @@ services:
     volumes:
       - ${PROJECT_ROOT}/_out/logs:/app/_out/logs
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       financer_postgres:
         condition: service_healthy

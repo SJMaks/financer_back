@@ -54,14 +54,12 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
-
-	allowedOrigins := map[string]struct{}{
-		"http://127.0.0.1:8000": {},
-		"http://localhost:8000": {},
-		"http://localhost:5173": {},
-		"http://127.0.0.1:5173": {},
+	allowedOrigins, err := loadAllowedOrigins()
+	if err != nil {
+		return nil, err
 	}
+
+	dbConnStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 
 	return &Config{
 		HTTPAddr:       httpAddr,
@@ -69,6 +67,28 @@ func LoadConfig() (*Config, error) {
 		DBConnString:   dbConnStr,
 		AllowedOrigins: allowedOrigins,
 	}, nil
+}
+
+func loadAllowedOrigins() (map[string]struct{}, error) {
+	raw, err := loadEnv("CORS_ALLOWED_ORIGINS")
+	if err != nil {
+		return nil, err
+	}
+
+	origins := make(map[string]struct{})
+	for _, o := range strings.Split(raw, ",") {
+		o = strings.TrimSpace(o)
+		if o == "" {
+			continue
+		}
+		origins[o] = struct{}{}
+	}
+
+	if len(origins) == 0 {
+		return nil, fmt.Errorf("%w: CORS_ALLOWED_ORIGINS", apperrors.EmptyEnv)
+	}
+
+	return origins, nil
 }
 
 func loadEnv(name string) (string, error) {
