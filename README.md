@@ -4,7 +4,7 @@ REST API сервер для приложения учёта личных фин
 
 Сайт доступен по адресу: www.financerapp.ru
 
-Схема API доступна по адресу: api.financerapp.ru/swagger/index.html
+Схема API доступна по адресу: [api.financerapp.ru/swagger/index.html](https://api.financerapp.ru/swagger/index.html)
 
 ---
 
