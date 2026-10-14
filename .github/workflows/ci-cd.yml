@@ -78,7 +78,7 @@ jobs:
           set -Eeuo pipefail
 
           COMMIT="$1"
-          APP_DIR="/projects/financer_back"
+          APP_DIR="projects/financer_back"
 
           cd "$APP_DIR"
 
