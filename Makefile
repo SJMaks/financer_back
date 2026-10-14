@@ -45,7 +45,7 @@ migrate-action:
 	fi; \
 	docker compose run --rm financer_postgres_migrate \
 		-path migrations -database postgres://${DB_USER}:${DB_PASSWORD}@financer_postgres:${DB_PORT}/${DB_NAME}?sslmode=disable \
-		"$(action)"
+		$(action)
 
 docker-ps:
 	@docker compose ps
