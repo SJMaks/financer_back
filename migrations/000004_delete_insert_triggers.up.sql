@@ -3,6 +3,11 @@ RETURNS TRIGGER AS $$
 DECLARE
     v_default_category_id BIGINT;
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM users WHERE id = OLD.user_id) THEN
+        DELETE FROM operations WHERE category_id = OLD.id;
+        RETURN OLD;
+    END IF;
+
     SELECT id
       INTO v_default_category_id
       FROM operation_categories
