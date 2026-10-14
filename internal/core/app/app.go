@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/SJMaks/financer_back/internal/core/auth"
 	"github.com/SJMaks/financer_back/internal/core/config"
@@ -86,6 +87,9 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	statisticsTransport.RegisterPrivateRouter(api, stcsHandler, authMiddleware.CheckAuth)
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler), commonMiddleware.CORS)
+	engine.GET("/healthy", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "Server is running and healthy")
+	})
 
 	return &App{
 		server: httpserver.New(engine, cfg.HTTPAddr),
