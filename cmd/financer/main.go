@@ -14,6 +14,7 @@ import (
 	"github.com/SJMaks/financer_back/internal/core/config"
 	"github.com/SJMaks/financer_back/internal/core/database"
 	"github.com/SJMaks/financer_back/internal/core/logger"
+	"github.com/SJMaks/financer_back/internal/core/redis"
 
 	_ "github.com/SJMaks/financer_back/docs"
 )
@@ -62,7 +63,14 @@ func run() (err error) {
 	}
 	defer db.Close()
 
-	app := app.NewApp(log, db, cfg)
+	rds, err := redis.NewRedis(ctx, cfg)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer rds.Close()
+
+	app := app.NewApp(log, db, cfg, rds)
 
 	errChan := make(chan error, 1)
 
