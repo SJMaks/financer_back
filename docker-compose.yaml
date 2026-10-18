@@ -13,12 +13,16 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     volumes:
       - ${PROJECT_ROOT}/_out/logs:/app/_out/logs
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
       financer_postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: always
   financer_postgres:
@@ -44,9 +48,20 @@ services:
   port_forwarder:
     image: alpine/socat:1.8.1.3
     container_name: financer_postgres_port_forwarder
-    command: tcp-listen:5432,fork,reuseaddr tcp-connect:financer_postgres:5432
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        socat tcp-listen:5432,fork,reuseaddr tcp-connect:financer_postgres:5432 &
+        exec socat tcp-listen:6379,fork,reuseaddr tcp-connect:redis:6379
     ports:
       - "127.0.0.1:${DB_PORT}:5432"
+      - "127.0.0.1:6379:6379"
+    depends_on:
+      financer_postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
   swagger:
     build: 
       context: ${PROJECT_ROOT}
@@ -58,6 +73,28 @@ services:
         ENTRYPOINT ["swag"]
     volumes:
       - ${PROJECT_ROOT}:/code
+  redis:
+    image: redis:8.8.3
+    container_name: financer_redis
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:-}
+    volumes:
+      - financer_redis_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'if [ -n "$$REDIS_PASSWORD" ]; then redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping; else redis-cli ping; fi'
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    restart: always
 
 volumes:
   financer_postgres_data:
+  financer_redis_data:

@@ -15,6 +15,9 @@ type Config struct {
 
 	DBConnString string
 
+	RedisAddr string
+	RedisPass string
+
 	AllowedOrigins map[string]struct{}
 }
 
@@ -54,6 +57,16 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	redisAddr, err := loadEnv("REDIS_ADDR")
+	if err != nil {
+		redisAddr = "localhost:6379"
+	}
+
+	redisPass, err := loadEnv("REDIS_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+
 	allowedOrigins, err := loadAllowedOrigins()
 	if err != nil {
 		return nil, err
@@ -65,6 +78,8 @@ func LoadConfig() (*Config, error) {
 		HTTPAddr:       httpAddr,
 		JWTSecret:      jwtSecret,
 		DBConnString:   dbConnStr,
+		RedisAddr:      redisAddr,
+		RedisPass:      redisPass,
 		AllowedOrigins: allowedOrigins,
 	}, nil
 }

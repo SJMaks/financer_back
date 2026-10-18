@@ -28,6 +28,7 @@ import (
 	usersTransport "github.com/SJMaks/financer_back/internal/features/users/transport"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
@@ -37,7 +38,7 @@ type App struct {
 	server *httpserver.Server
 }
 
-func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
+func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config, rds *redis.Client) *App {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 
@@ -81,7 +82,7 @@ func NewApp(log *zap.SugaredLogger, db *pgxpool.Pool, cfg *config.Config) *App {
 	operationsTransport.RegisterPrivateRouter(api, opsHandler, authMiddleware.CheckAuth)
 
 	stcsRepo := statisticsRepo.NewPostgres(db)
-	stcsSrv := statisticsService.NewService(stcsRepo)
+	stcsSrv := statisticsService.NewService(stcsRepo, rds, log)
 	stcsHandler := statisticsTransport.NewHandler(log, stcsSrv, authMiddleware)
 
 	statisticsTransport.RegisterPrivateRouter(api, stcsHandler, authMiddleware.CheckAuth)

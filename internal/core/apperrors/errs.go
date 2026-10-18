@@ -20,6 +20,7 @@ func (e *Error) Is(target error) bool {
 var (
 	EnvNotFound  = &Error{Code: "env_not_found", Msg: "env var not found"}
 	EmptyEnv     = &Error{Code: "env_empty", Msg: "env var is empty"}
+	RedisConnErr = &Error{Code: "redis_conn_err", Msg: "Couldn't connect to Redis"}
 	BadJSON      = &Error{Code: "bad_json", Status: http.StatusBadRequest}
 	Unauthorized = &Error{Code: "unauthorized", Msg: "unauthorized", Status: http.StatusUnauthorized}
 	IvalidQuery  = &Error{Code: "invalid_query", Status: http.StatusBadRequest}
