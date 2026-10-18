@@ -114,11 +114,11 @@ jobs:
           git reset --hard "$COMMIT"
 
           echo "---start migrate up---"
-          make --trace migrate-up
+          make --trace migrate-up < /dev/null
           echo "---finish migrate up---"
 
           echo "---start deploy---"
-          make --trace financer-deploy
+          make --trace financer-deploy < /dev/null
           echo "---finish deploy---"
 
           REMOTE
