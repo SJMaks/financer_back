@@ -58,7 +58,6 @@ func (h *Handler) GetByUser(c *gin.Context) {
 // @Param        accountID path int true "Account ID"
 // @Success      200 {object} AccountStatisticsSliceDTO "Account statistics"
 // @Failure      404 {object} utils.HTTPError "Account not found"
-// @Failure      404 {object} utils.HTTPError "User not found"
 // @Failure      401 {object} utils.HTTPError "Unauthorized"
 // @Failure      500 {object} utils.HTTPError "Internal error"
 // @Router       /accounts/{accountID}/statistics [get]

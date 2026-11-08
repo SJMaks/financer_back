@@ -70,7 +70,7 @@ func (s *Service) GetByAccount(ctx context.Context, accountID, userID int64) ([]
 		}
 	}
 
-	stats, err := s.repo.GetByAccount(ctx, userID, accountID)
+	stats, err := s.repo.GetByAccount(ctx, accountID, userID)
 	if err != nil {
 		return nil, err
 	}
