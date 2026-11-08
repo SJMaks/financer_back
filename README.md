@@ -1,10 +1,14 @@
 # Financer API
 
+![Демонстрация](assets/Financer_demo.gif)
+
 REST API сервер для приложения учёта личных финансов: счета, категории, доходы и расходы, помесячная статистика. Pet-проект, написанный для закрепления навыков backend-разработки на Go: чистая архитектура, работа с PostgreSQL на уровне триггеров и представлений, JWT-аутентификация, тесты с моками и автодокументирование API через Swagger.
 
 Сайт доступен по адресу: www.financerapp.ru
 
 Схема API доступна по адресу: [api.financerapp.ru/swagger/index.html](https://api.financerapp.ru/swagger/index.html)
+
+![Swagger](assets/Financer_readme_3.png)
 
 ---
 
@@ -39,6 +43,12 @@ REST API сервер для приложения учёта личных фин
 - **Swagger UI** - интерактивная документация, генерируется аннотациями `swaggo` из кода хендлеров.
 - **Graceful shutdown** - корректное завершение по SIGINT/SIGTERM с таймаутом 10 секунд.
 - **Логирование** - `zap` с двумя синками: stdout (Info) и файл в `_out/logs/` (Debug).
+
+### Главная страница / дашборд
+![Дашборд](assets/Financer_readme_1.png)
+
+### Страница статистики
+![Дашборд](assets/Financer_readme_2.png)
 
 ## Стек
 
