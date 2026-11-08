@@ -495,7 +495,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "User not found",
+                        "description": "Account not found",
                         "schema": {
                             "$ref": "#/definitions/github_com_SJMaks_financer_back_internal_core_utils.HTTPError"
                         }
