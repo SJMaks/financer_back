@@ -1,5 +1,7 @@
 # Financer API
 
+![CI](https://github.com/SJMaks/financer_back/actions/workflows/ci-cd.yml/badge.svg)
+
 ![Демонстрация](assets/Financer_demo.gif)
 
 REST API сервер для приложения учёта личных финансов: счета, категории, доходы и расходы, помесячная статистика. Pet-проект, написанный для закрепления навыков backend-разработки на Go: чистая архитектура, работа с PostgreSQL на уровне триггеров и представлений, JWT-аутентификация, тесты с моками и автодокументирование API через Swagger.
