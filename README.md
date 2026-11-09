@@ -1,6 +1,6 @@
 # Financer API
 
-![CI](https://github.com/SJMaks/financer_back/actions/workflows/ci-cd.yml/badge.svg)
+[![Financer CI/CD](https://github.com/SJMaks/financer_back/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/SJMaks/financer_back/actions/workflows/ci-cd.yml)
 
 ![Демонстрация](assets/Financer_demo.gif)
 

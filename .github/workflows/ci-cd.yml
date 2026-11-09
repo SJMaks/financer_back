@@ -107,6 +107,11 @@ jobs:
 
           cd "$APP_DIR"
 
+          if ! git config core.sparseCheckout | grep -q true; then
+            git sparse-checkout init --no-cone
+            git sparse-checkout set '*' '!assets/'
+          fi
+
           git fetch --prune origin main
 
           git cat-file -e "${COMMIT}^{commit}"
